@@ -39,3 +39,18 @@ def sqrt_mod(a: int, p: int) -> int:
         sqrt_m1 = pow(2, (p - 1) // 4, p)
         return (r * sqrt_m1) % p
     raise ValueError("No square root exists for the given input.")
+
+
+def decode_public_key(u_bytes: bytes, p: int) -> int:
+    """
+    Decode a 32-byte public key: interpret as little-endian integer,
+    clear the most significant bit, then reduce modulo p.
+    """
+    u_int = int.from_bytes(u_bytes, "little")
+    u_int &= (1 << 255) - 1
+    return u_int % p
+
+
+def encode_u_coordinate(x: int) -> bytes:
+    """Encode an integer x as a 32-byte little-endian byte string."""
+    return x.to_bytes(32, "little")
