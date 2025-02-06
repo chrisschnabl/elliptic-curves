@@ -8,6 +8,12 @@ authors = [
     { name = "Chris Schnabl", email = "cs2280@cam.ac.uk" },
 ]
 readme = { file = "README.md", content-type = "text/markdown" }
+dependencies = [
+    "pydantic>=2.10.6",
+    "pynacl>=1.5.0",
+]
+
+# TODO CS: move to workspaces
 
 [project.urls]
 homepage = "https://github.com/chrisschnabl/elliptic-curves#readme"
@@ -50,13 +56,11 @@ extend-select = [
     "D200",
     "D201",
     "D204",
-    "D205",
     "D206",
     "D210",
     "D211",
     "D213",
     "D300",
-    "D400",
     "D402",
     "D403",
     "D404",
