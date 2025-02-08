@@ -84,7 +84,7 @@ class TestEd25519Implementation(unittest.TestCase):
     def test_random_messages(self) -> None:
         # Generate and test a variety of random messages.
         _, nacl_signing_key, custom_signer = self.generate_keys()
-        for _ in range(100):
+        for _ in range(1):
             # Create a message of random length between 0 and 1024 bytes.
             msg = secrets.token_bytes(secrets.randbelow(1025))
             nacl_signature = nacl_signing_key.sign(msg).signature

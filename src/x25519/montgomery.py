@@ -23,6 +23,7 @@ def decode_u(u_bytes: bytes) -> int:
     u = bytearray(u_bytes)
     u[31] &= 127
     return int.from_bytes(u, "little")
+    # Don't need the y-coordinate, so we can just return the x-coordinate
 
 
 def encode_u(u_int: int) -> bytes:
@@ -47,7 +48,6 @@ def x25519_ladder(k_int: int, u_int: int) -> int:
     # (Note the top bit is always set after clamping, so we skip bit 255)
 
     # TODO: this works, but we can do better, e.g. look at Martin's tutorial
-
     for t in reversed(range(255)):
         k_t = (k_int >> t) & 1
         # swap ^= k_t
@@ -96,6 +96,7 @@ def x25519(k_bytes: bytes, u_bytes: bytes) -> bytes:
       - Montgomery ladder
       - Returns 32-byte little-endian result
     """
+    # k is private key, u is public key
     k_int = clamp_scalar(bytearray(k_bytes))
     u_int = decode_u(u_bytes)
     x_result = x25519_ladder(k_int, u_int)
@@ -115,6 +116,9 @@ if __name__ == "__main__":
     u_bytes_ = bytes.fromhex(u_hex)
     result = x25519(k_bytes_, u_bytes_)
 
+    # WE might now have to recover the point from the public key
+    # TOD: find out what does it mean with the k und u
+
     # Demonstrate scalar multiplication with basepoint
     # (X25519 private key -> public key).
     basepoint = b"\x09" + b"\x00" * 31
@@ -124,4 +128,4 @@ if __name__ == "__main__":
     private_scalar = os.urandom(32)  # not cryptographically safe in example
     public_u = x25519(private_scalar, basepoint)
 
-    public_u = x25519(private_scalar, basepoint)
+    assert expect_hex == result.hex()

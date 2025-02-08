@@ -1,54 +1,14 @@
-import os
-
-from x25519.util import clamp_scalar, modinv
+from util import clamp_scalar, modinv, tonelli
 
 # Prime for Curve25519 and the curve parameter A.
 p = 2**255 - 19
 A = 486662
 Point = tuple[int, int]
 
-
-def tonelli_shanks(n: int, p: int) -> int | None:
-    """
-    Compute the square root of n modulo p (if it exists) using Tonelli-Shanks.
-    Returns one square root, or None if no square root exists.
-    """
-    # Check if n is a quadratic residue via Euler's criterion.
-    if pow(n, (p - 1) // 2, p) != 1:
-        return None
-
-    # Factor p - 1 as Q * 2^S with Q odd.
-    S = 0
-    Q = p - 1
-    while Q % 2 == 0:
-        Q //= 2
-        S += 1
-
-    # Find a quadratic non-residue z.
-    z = 2
-    while pow(z, (p - 1) // 2, p) != p - 1:
-        z += 1
-
-    M = S
-    c = pow(z, Q, p)
-    t = pow(n, Q, p)
-    R = pow(n, (Q + 1) // 2, p)
-
-    while t != 1:
-        # Find the smallest i (0 < i < M) such that t^(2^i) == 1 mod p.
-        i = 0
-        temp = t
-        while temp != 1:
-            temp = (temp * temp) % p
-            i += 1
-            if i == M:
-                return None  # Should not happen
-        b = pow(c, 2 ** (M - i - 1), p)
-        M = i
-        c = (b * b) % p
-        t = (t * c) % p
-        R = (R * b) % p
-    return R
+BasePoint: Point = (
+    9,
+    14781619447589544791020593568409986887264606134616475288964881837755586237401,
+)
 
 
 def recover_point(x: int) -> Point:
@@ -58,42 +18,54 @@ def recover_point(x: int) -> Point:
     If no square root exists, raises ValueError.
     """
     rhs = (pow(x, 3, p) + A * pow(x, 2, p) + x) % p
-    y = tonelli_shanks(rhs, p)
+
+    # if rhs % 8 == 5:
+    #    y = modinv(rhs, p)
+    # else:
+    #    y = tonelli_shanks(rhs, p)
+    # y = tonelli_shanks(rhs, p)
+    y = tonelli(rhs, p)
     if y is None:
         raise ValueError("No valid y for given x")
+
     # (You may choose one of the two square roots; here we choose the smaller one)
     if y > p - y:  # TODO CS: why is this above needed
         y = p - y
     return (x, y)
 
 
-#  TODO CS: check this with the assignment again
+# TODO CS: check this with the assignment again
 # TODO CS: this uses projective coordinates
 # TODO CS: use projective coordinate more often
-def point_add(P: Point | None, Q: Point | None) -> Point | None:
+
+MontgomeryIdentity = None
+MontgomeryPoint = Point | MontgomeryIdentity
+
+
+def point_add(P: MontgomeryPoint, Q: MontgomeryPoint) -> MontgomeryPoint:
     """
     Add two points P and Q (affine coordinates) on the Montgomery curve:
       y^2 = x^3 + A*x^2 + x  (mod p)
     For distinct P and Q:
        λ = (y2 - y1)/(x2 - x1) mod p,
        x3 = λ^2 - A - x1 - x2  mod p,
-       y3 = λ*(x1 - x3) - y1   mod p.
+       y3 = λ*(x1 - x3) - y1   mod p. compared to slides this is simplified since we alreadyk now x3
+       avoids recomputation, intuitively lambda * (x1 - x3) gives us the difference in y direction
     For doubling, see point_double.
     Returns the resulting point, or None if the result is the point at infinity.
     """
-    if P is None:
+    if P is MontgomeryIdentity:
         return Q
-    if Q is None:
+    if Q is MontgomeryIdentity:
         return P
 
     x1, y1 = P
     x2, y2 = Q
 
-    # Handle the case where the x-coordinates are equal.
     if x1 == x2:
-        # If y1 is the negative of y2 then the result is the point at infinity.
+        # If y1 == y2 then the result is the point at infinity.
         if (y1 + y2) % p == 0:
-            return None
+            return MontgomeryIdentity
         # Otherwise, treat it as doubling.
         return point_double(P)
 
@@ -103,7 +75,7 @@ def point_add(P: Point | None, Q: Point | None) -> Point | None:
     return (x3, y3)
 
 
-def point_double(P: Point | None) -> Point | None:
+def point_double(P: MontgomeryPoint) -> MontgomeryPoint:
     """
     Double the point P on the Montgomery curve.
     Uses the tangent line at P:
@@ -112,18 +84,18 @@ def point_double(P: Point | None) -> Point | None:
        y3 = λ*(x - x3) - y  mod p.
     Returns the doubled point, or None if y is 0.
     """
-    if P is None:
-        return None
+    if P is MontgomeryIdentity:
+        return MontgomeryIdentity
     x, y = P
     if y == 0:
-        return None
+        return MontgomeryIdentity
     lam = ((3 * x * x + 2 * A * x + 1) * modinv(2 * y, p)) % p
     x3 = (lam * lam - A - 2 * x) % p
     y3 = (lam * (x - x3) - y) % p
     return (x3, y3)
 
 
-def scalar_mult(k: int, P: Point | None) -> Point | None:
+def scalar_mult(k: int, P: MontgomeryPoint) -> MontgomeryPoint:
     """
     Compute the scalar multiplication k * P using the recursive double-and-add algorithm:
       - If k == 1, return P.
@@ -163,10 +135,10 @@ def x25519(private_key_bytes: bytes, public_key_bytes: bytes) -> bytes:
       - Return the x-coordinate of Q as 32 bytes (little-endian).
     """
     scalar = clamp_scalar(bytearray(private_key_bytes))
-    x_coord = decode_public_key(public_key_bytes)
+    # x_coord = decode_public_key(public_key_bytes)
     P = recover_point(x_coord)
-    # TODO CS: why do we need this, and can we make this easier
-    # TODO CS: why do we have to work in affine points
+    # Just assume the key is 64 bytes and includes both x and y coordinates
+    # P = (x_coord, int.from_bytes(public_key_bytes[32:], "little"))
     Q = scalar_mult(scalar, P)
     # Return the x-coordinate of the resulting point.
     if Q is None:
@@ -176,7 +148,7 @@ def x25519(private_key_bytes: bytes, public_key_bytes: bytes) -> bytes:
 
 # Example usage
 if __name__ == "__main__":
-    # Generate a random 32-byte private key.
+    """
     private_key = os.urandom(32)
     # For demonstration, use the standard base point whose x-coordinate is 9.
     base_x = 9
@@ -195,3 +167,4 @@ if __name__ == "__main__":
     k_bytes_ = bytes.fromhex(k_hex)
     u_bytes_ = bytes.fromhex(u_hex)
     result = x25519(k_bytes_, u_bytes_)
+    """
