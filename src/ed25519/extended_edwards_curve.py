@@ -1,7 +1,7 @@
 
 from typing import override
-from ed255192.edwards_curve import ExtendedPoint, Point, IdentityPoint
-from ed255192.affine_edwards_curve import AffineEdwardsCurve, AffinePoint
+from ed25519.edwards_curve import ExtendedPoint, Point, IdentityPoint
+from ed25519.affine_edwards_curve import AffineEdwardsCurve, AffinePoint
 # TODO: am unhappy with the naming
 
 class ExtendedEdwardsCurve(AffineEdwardsCurve):

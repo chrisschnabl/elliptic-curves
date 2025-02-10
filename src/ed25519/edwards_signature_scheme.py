@@ -1,22 +1,27 @@
+from ed25519.affine_edwards_curve import AffineEdwardsCurve
+from ed25519.edwards_curve import EdwardsCurve
+from ed25519.extended_edwards_curve import ExtendedEdwardsCurve
+from ed25519.signature_scheme import SignatureScheme
 import nacl.hash
-from ed25519.twisted_edwards_curve import TwistedEdwardsCurve
 from util import clamp_scalar
-
-class Ed25519:
+import hashlib
+class Ed25519(SignatureScheme):
     """
     An implementation of the Ed25519 signature scheme.
 
     This class uses an EdwardsCurve instance for all curve arithmetic.
     """
 
-    def __init__(self, secret_key: bytes):
-        self.curve = TwistedEdwardsCurve()
-        self.hash_function = lambda plain_text: nacl.hash.sha512(plain_text, encoder=nacl.encoding.RawEncoder)
+    def __init__(self, secret_key: bytes, curve: EdwardsCurve = AffineEdwardsCurve()):
+        self.curve = curve
+        self.hash_function = lambda plain_text: hashlib.sha512(plain_text).digest()
+        #self.hash_function = lambda plain_text: nacl.hash.sha512(plain_text, encoder=nacl.encoding.RawEncoder)
+        # somehow this fails for the invalid Signature TEST TODO CS: why?
         self._hashed_secret_key = self.hash_function(secret_key)
-        s_bits = bytearray(self._hashed_secret_key[:32])
-        s_int = clamp_scalar(s_bits)
-        pk_point = self.curve.scalar_mult(s_int, self.curve.B)
-        self.public_key = self.curve.compress(pk_point)
+        self.s_int = clamp_scalar(bytearray(self._hashed_secret_key[:32]))
+        self.public_key = self.curve.scalar_mult(self.curve.B, self.s_int)
+        self.public_key = self.curve.compress(self.public_key)
+
 
     def sign(self, msg: bytes) -> bytes:
         """
@@ -32,15 +37,12 @@ class Ed25519:
           7. Compute response t = (r + k * s) mod q.
           8. Return signature = R || t (64 bytes).
         """
-        # Split the hashed secret key into its two halves.
-        s_bits = bytearray(self._hashed_secret_key[:32])
         prefix = self._hashed_secret_key[32:]
-        s_int = clamp_scalar(s_bits)
 
         # Compute nonce r = SHA512(prefix || msg) mod q.
         r_hash = self.hash_function(prefix + msg)
         r_int = int.from_bytes(r_hash, "little") % self.curve.q
-        R_point = self.curve.scalar_mult(r_int, self.curve.B)
+        R_point = self.curve.scalar_mult(self.curve.B, r_int)
         R_comp = self.curve.compress(R_point)
 
         # Compute challenge k = SHA512(R || public_key || msg) mod q.
@@ -48,7 +50,7 @@ class Ed25519:
         k_int = int.from_bytes(k_hash, "little") % self.curve.q
 
         # Compute response t = (r + k * s) mod q.
-        t_int = (r_int + k_int * s_int) % self.curve.q
+        t_int = (r_int + k_int * self.s_int) % self.curve.q
         t_bytes = t_int.to_bytes(32, "little")
 
         return R_comp + t_bytes
@@ -64,7 +66,6 @@ class Ed25519:
           4. Compute challenge k = SHA512(R || pk || msg) mod q.
           5. Check that [t]B equals R + [k]A (where A is the public key point).
         """
-        curve = self.curve
 
         if len(sig) != 64:
             raise ValueError("Signature must be 64 bytes")
@@ -72,21 +73,24 @@ class Ed25519:
             raise ValueError("Public key must be 32 bytes")
         R_comp = sig[:32]
         t_bytes = sig[32:]
-        t_int = int.from_bytes(t_bytes, "little") % curve.q
+        t_int = int.from_bytes(t_bytes, "little") % self.curve.q
 
         try:
-            R = curve.uncompress(R_comp)
-            A = curve.uncompress(pk)
+            R = self.curve.uncompress(R_comp)
+            A = self.curve.uncompress(pk)
         except ValueError:
             return False
 
         k_hash = self.hash_function(R_comp + pk + msg)
-        k_int = int.from_bytes(k_hash, "little") % curve.q
+        k_int = int.from_bytes(k_hash, "little") % self.curve.q
 
         # Compute left-hand side: [t]B.
-        LHS = curve.scalar_mult(t_int, curve.B) # B is extended homogeneous coordinates
+        LHS = self.curve.scalar_mult(self.curve.B, t_int) # B is extended homogeneous coordinates
         # Compute right-hand side: R + [k]A.
-        kA = curve.scalar_mult(k_int, A)
-        RHS = curve.add(R, kA)
+        kA = self.curve.scalar_mult(A, k_int)
+        RHS = self.curve.add(R, kA)
 
-        return curve.equals(LHS, RHS)  # Fails if lambda scalar scales the projective coordinates
+        return self.curve.point_equals(LHS, RHS)  # Fails if lambda scalar scales the projective coordinates
+    
+    def get_public_key(self) -> bytes:
+        return self.public_key
