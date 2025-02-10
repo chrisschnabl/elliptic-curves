@@ -165,7 +165,7 @@ def sqrt_mod(a: int, p: int) -> int:
          where sqrt(-1) = 2^((p-1)//4) mod p.
       Otherwise, raise an error.
 
-    This method works for p = 2^255 - 19.
+    This method works for p = 2^255 - 19 (I guess)
     """
 
     exp = (p + 3) // 8
