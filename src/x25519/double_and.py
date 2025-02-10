@@ -11,6 +11,11 @@ BasePoint: Point = (
 )
 
 
+# TODO CS: here we can assume that the y is sent over the network
+# TODO CS: so we don't need to recover it
+# TODO the notes mention this but the slides ar unambigious
+
+
 def recover_point(x: int) -> Point:
     """
     Given an x-coordinate (integer), recover an affine point (x,y) on the curve
@@ -135,7 +140,7 @@ def x25519(private_key_bytes: bytes, public_key_bytes: bytes) -> bytes:
       - Return the x-coordinate of Q as 32 bytes (little-endian).
     """
     scalar = clamp_scalar(bytearray(private_key_bytes))
-    # x_coord = decode_public_key(public_key_bytes)
+    x_coord = decode_public_key(public_key_bytes)
     P = recover_point(x_coord)
     # Just assume the key is 64 bytes and includes both x and y coordinates
     # P = (x_coord, int.from_bytes(public_key_bytes[32:], "little"))

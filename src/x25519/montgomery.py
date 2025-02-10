@@ -48,6 +48,7 @@ def x25519_ladder(k_int: int, u_int: int) -> int:
     # (Note the top bit is always set after clamping, so we skip bit 255)
 
     # TODO: this works, but we can do better, e.g. look at Martin's tutorial
+    # this is basically from the RFC
     for t in reversed(range(255)):
         k_t = (k_int >> t) & 1
         # swap ^= k_t

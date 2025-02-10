@@ -1,13 +1,11 @@
 import unittest
 from binascii import unhexlify
 
-# omething is fucked up here
-# from x25519.montgomery import x25519
+from x25519.montgomery_optimized import x25519
 from nacl.bindings import crypto_scalarmult
 from parameterized import parameterized
-
-from x25519.double_and import x25519
-
+#from x25519.double_and import x25519
+# yeah this double and add just doesn't work
 
 class TestX25519ImplementsRFC7748(unittest.TestCase):
     @parameterized.expand(
@@ -88,7 +86,7 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
         import os
 
         # Number of random test cases
-        num_tests = 0
+        num_tests = 10000
 
         for i in range(num_tests):
             # Generate random 32-byte scalar and u-coordinate
