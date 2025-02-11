@@ -3,7 +3,7 @@ from typing import Callable
 
 from util import clamp_scalar, decode_u, encode_u_coordinate
 
-class X25519Implementation(ABC):
+class MontgomeryLadder(ABC):
     def __init__(self):
        self.p = 2**255 - 19
        self.a24 = 121665
@@ -12,11 +12,11 @@ class X25519Implementation(ABC):
         return self.ladder(k_bytes, u_bytes)  
        
     @abstractmethod
-    def ladder(self, k_int: int, xP: int) -> int:
+    def scalar_mult(self, k_int: int, xP: int) -> int:
         raise NotImplementedError
 
 class EllipticCurveDiffieHellman:
-    def __init__(self, ladder: X25519Implementation):
+    def __init__(self, ladder: MontgomeryLadder):
       self.ladder = ladder
 
     def x25519(self, k_bytes: bytes, u_bytes: bytes) -> bytes:
@@ -31,5 +31,5 @@ class EllipticCurveDiffieHellman:
       """
       k_int = clamp_scalar(bytearray(k_bytes))
       xP = decode_u(u_bytes)
-      result_int = self.ladder(k_int, xP)
+      result_int = self.ladder.scalar_mult(k_int, xP)
       return encode_u_coordinate(result_int)

@@ -74,3 +74,17 @@ def decode_public_key(u_bytes: bytes, p: int) -> int:
 def encode_u_coordinate(x: int) -> bytes:
     """Encode an integer x as a 32-byte little-endian byte string."""
     return x.to_bytes(32, "little")
+
+# --- Conversion Helpers ---
+def affine_to_projective(x: int) -> tuple[int, int]:
+    """
+    Convert an affine coordinate to a projective coordinate.
+    Given x (affine), return (X:Z) with Z = 1.
+    """
+    return (x, 1)
+
+def projective_to_affine(X: int, Z: int, p: int) -> tuple[int, int]:
+    """
+    Convert a projective coordinate (X:Z) to an affine coordinate x = X/Z mod P.
+    """
+    return (X *  modinv(Z, p)) % p
