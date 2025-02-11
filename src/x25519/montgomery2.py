@@ -20,20 +20,6 @@ def projective_to_affine(X: int, Z: int) -> int:
     inv_Z = modinv(Z, P)
     return (X * inv_Z) % P
 
-# --- Core Arithmetic Helpers ---
-
-def cswap(swap: int, x: int, y: int) -> (int, int):
-    """
-    Branchless conditional swap.
-
-    Given a flag (swap = 0 or 1) and two numbers x and y,
-    return (x, y) unchanged if swap == 0 or swapped if swap == 1.
-    (Note: in Python this is not constant‑time, but it shows the intended arithmetic.)
-    """
-    dummy = swap * (x - y)
-    x_new = x - dummy
-    y_new = y + dummy
-    return x_new, y_new
 
 def ladder_step(X0: int, Z0: int, X1: int, Z1: int, xP: int) -> (int, int, int, int):
     """
@@ -80,24 +66,6 @@ def ladder_step(X0: int, Z0: int, X1: int, Z1: int, xP: int) -> (int, int, int, 
 
     return new_X0, new_Z0, new_X1, new_Z1
 
-# --- Encoding / Decoding Helpers ---
-
-def decode_u(u_bytes: bytes) -> int:
-    """
-    Decode a 32-byte string to an integer,
-    masking off the high bit as per RFC 7748.
-    """
-    u = bytearray(u_bytes)
-    u[31] &= 127
-    return int.from_bytes(u, "little")
-
-def encode_u(u_int: int) -> bytes:
-    """
-    Encode an integer as a 32-byte little-endian string.
-    """
-    return u_int.to_bytes(32, "little")
-
-# --- Montgomery Ladder Implementation ---
 
 def x25519_ladder(k_int: int, u_int: int) -> int:
     """

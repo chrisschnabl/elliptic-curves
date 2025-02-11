@@ -23,12 +23,6 @@ def recover_point(x: int) -> Point:
     If no square root exists, raises ValueError.
     """
     rhs = (pow(x, 3, p) + A * pow(x, 2, p) + x) % p
-
-    # if rhs % 8 == 5:
-    #    y = modinv(rhs, p)
-    # else:
-    #    y = tonelli_shanks(rhs, p)
-    # y = tonelli_shanks(rhs, p)
     y = tonelli(rhs, p)
     if y is None:
         raise ValueError("No valid y for given x")
@@ -130,7 +124,11 @@ def encode_u_coordinate(x: int) -> bytes:
     return x.to_bytes(32, "little")
 
 
-def x25519(private_key_bytes: bytes, public_key_bytes: bytes) -> bytes:
+# TBH I think trying to the the double add for this is a bit of a pain and does not include any learning
+# It's just annyoing to deal with the y coordinate since no one though taobut it 
+# Esp since the slides mention tonelli-shanks, but it is not applicable. 
+# This had me confused for a bit. I implemented tonelli-shanks from scratch and compared it against other implementaitosn to find out whats' wrong only to realize that the points are often not even correct and getting y coordinates might not be posisle
+def x25519(private_key_bytes: bytes, public_key_bytes: bytes) -> tuple[bytes, bytes]:
     """
     Compute the X25519 function:
       - Clamp the 32-byte private key.
@@ -142,8 +140,7 @@ def x25519(private_key_bytes: bytes, public_key_bytes: bytes) -> bytes:
     scalar = clamp_scalar(bytearray(private_key_bytes))
     x_coord = decode_public_key(public_key_bytes)
     P = recover_point(x_coord)
-    # Just assume the key is 64 bytes and includes both x and y coordinates
-    # P = (x_coord, int.from_bytes(public_key_bytes[32:], "little"))
+    #P = (x_coord, int.from_bytes(y_bytes, "little"))
     Q = scalar_mult(scalar, P)
     # Return the x-coordinate of the resulting point.
     if Q is None:
