@@ -2,8 +2,8 @@ import unittest
 from binascii import unhexlify
 from parameterized import parameterized
 from util import encode_u_coordinate
-from x25519.ecdh import EllipticCurveDiffieHellman
-from x25519.montgomery import MontgomeryLadderRFC7748
+from x25519.diffie_hellman import EllipticCurveDiffieHellman
+from x25519.montgomery_ladder import MontgomeryLadderRFC7748
 from x25519.montgomery2 import MontgomeryLadderMKTutorial
 from nacl.bindings import crypto_scalarmult
 from x25519.montgomery_optimized import MontgomeryLadderOptimized

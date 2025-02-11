@@ -186,6 +186,7 @@ class TestEd25519Implementation(unittest.TestCase):
         )
 
     
+    # TODO: CS test interoperability with PyNaCl
     # TODO: CS run timing tests
 
 if __name__ == "__main__":
