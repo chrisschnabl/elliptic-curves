@@ -11,6 +11,7 @@ class TestTonelliShanks(unittest.TestCase):
         p = 2**255 - 19
         # We only need this to work for 2^255 - 19, lol
         # But should work WLOG (trust me, bro)
+        # TODO CS: this does not wokr
 
         for _ in range(2, 1_000):
             n = random.randint(1, 10_000_000)
