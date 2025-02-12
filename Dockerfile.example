@@ -5,6 +5,5 @@ WORKDIR $WORKDIR_PATH
 
 COPY ./src/ ./
 
-USER 10000
-
+USER 1337
 CMD ["python", "-m", "example"]
