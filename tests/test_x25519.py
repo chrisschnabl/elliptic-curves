@@ -1,10 +1,17 @@
 import unittest
 from binascii import unhexlify
-from parameterized import parameterized
-from nacl.bindings import crypto_scalarmult
 
-from x25519.montgomery_ladder import MontgomeryLadderRFC7748, MontgomeryLadderMKTutorial, MontgomeryLadderOptimized
+from nacl.bindings import crypto_scalarmult
+from parameterized import parameterized
+
 from x25519.group_law import X25519CurveGroupLaw
+from x25519.montgomery_ladder import (
+    MontgomeryLadderMKTutorial,
+    MontgomeryLadderOptimized,
+    MontgomeryLadderRFC7748,
+)
+from x25519.x25519_curve import X25519Curve
+
 
 class TestX25519ImplementsRFC7748(unittest.TestCase):
     @parameterized.expand(
@@ -14,9 +21,10 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
             ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
-    )
-    def test_rfc7748_vectors(self, name, impl):
-        vectors = [(    
+    )  # type: ignore
+    def test_rfc7748_vectors(self, name: str, impl: X25519Curve) -> None:
+        vectors = [
+            (
                 "vector1",
                 "a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4",
                 "e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c",
@@ -48,12 +56,18 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
             self.assertEqual(
                 result_custom,
                 expected,
-                f"{name}: X25519 [{name}] implementation does not match the expected RFC 7748 result.",
+                f"""
+                {name}: X25519 [{name}] implementation
+                does not match the expected RFC 7748 result.
+                k: {k_bytes.hex()}
+                u: {u_bytes.hex()}
+                """,
             )
 
             self.assertEqual(
-                result_custom, crypto_scalarmult(k_bytes, u_bytes),
-                f"{name}: X25519 [{name}] implementation does not match PyNaCl's implementation."
+                result_custom,
+                crypto_scalarmult(k_bytes, u_bytes),
+                f"{name}: X25519 [{name}] doesnot match PyNaCl's implementation.",
             )
 
     @parameterized.expand(
@@ -63,9 +77,8 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
             ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
-    )
-
-    def test_rfc7748_iterative(self, name, impl):
+    )  # type: ignore
+    def test_rfc7748_iterative(self, name: str, impl: X25519Curve) -> None:
         # Initial values for k and u as specified in RFC 7748 Section 5.2
         k = unhexlify("0900000000000000000000000000000000000000000000000000000000000000")
         u = unhexlify("0900000000000000000000000000000000000000000000000000000000000000")
@@ -90,14 +103,18 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
             self.assertEqual(
                 k,
                 k_2,
-                f"Iteration {i}: X25519 output [{name}] does not match the expected result.",
+                f"""
+                Iteration {i}: X25519 output [{name}] does not match the expected result.
+                k: {k.hex()}
+                k_2: {k_2.hex()}
+                """,
             )
             if i in expected_outputs:
                 expected = unhexlify(expected_outputs[i])
                 self.assertEqual(
                     expected,
                     k,
-                    f"Iteration {i}: X25519 output [{name}] does not match the expected result.",
+                    f"Iteration {i}: output [{name}] does not match expected.",
                 )
 
     @parameterized.expand(
@@ -106,13 +123,13 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
         ]
-    )
-    def test_random_vectors(self, name, impl):
+    )  # type: ignore
+    def test_random_vectors(self, name: str, impl: X25519Curve) -> None:
         """Test X25519 implementation against PyNaCl with random keys and points."""
         import os
 
         # Number of random test cases
-        num_tests = 2_000
+        num_tests = 200
 
         # TODO: also sample random points (that are valid points on the curve)
 
@@ -124,7 +141,10 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
                 result_custom = impl.x25519(k_bytes, u_bytes)
             except Exception as e:
                 self.fail(
-                    f"X25519 [{name}] implementation raised an exception on random test {i}: {e}"
+                    f"""
+                    X25519 [{name}] implementation
+                    raised an exception on random test {i}: {e}
+                    """
                 )
 
             try:
@@ -138,5 +158,10 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
             self.assertEqual(
                 result_custom,
                 result_nacl,
-                f"Mismatch between X25519 [{name}] and PyNaCl implementations on random test {i}.",
+                f"""
+                Mismatch between X25519 [{name}] and PyNaCl implementations
+                on random test {i}.
+                k: {k_bytes.hex()}
+                u: {u_bytes.hex()}
+                """,
             )

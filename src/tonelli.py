@@ -1,15 +1,13 @@
-from typing import Optional, Tuple
-
 # Translated into Python from postscript code found here:
 # https://github.com/mvaneerde/blog/blob/develop/tonelli-shanks/tonelli-shanks.ps1
 
-def decompose(n: int) -> Tuple[int, int]:
+
+def decompose(n: int) -> tuple[int, int]:
     """
     Decompose an integer n as q * 2^s with q odd.
 
     Args:
         n: A positive integer.
-
     Returns:
         A tuple (q, s) such that n = q * 2^s and q is odd.
     """
@@ -89,12 +87,14 @@ def find_nonsquare(p: int) -> int:
     raise ValueError(f"Could not find a quadratic non-residue modulo {p}")
 
 
-def tonelli(n: int, p: int) -> Optional[int]:
+def tonelli(n: int, p: int) -> int | None:
     """
     Solve for a square root r of n modulo p, i.e. find r such that r^2 ≡ n (mod p).
 
-    For an odd prime p and a quadratic residue n modulo p, there are two solutions: r and p - r.
-    This function returns one of the solutions. (The other solution can be obtained as p - r.)
+    For an odd prime p and a quadratic residue n modulo p,
+    there are two solutions: r and p - r.
+    This function returns one of the solutions.
+    (The other solution can be obtained as p - r.)
     For p == 2, the solution is trivially n mod 2.
 
     Args:
@@ -102,7 +102,8 @@ def tonelli(n: int, p: int) -> Optional[int]:
         p: An odd prime (or p == 2).
 
     Returns:
-        A square root r (0 <= r < p) if one exists, or None if n is not a quadratic residue modulo p.
+        A square root r (0 <= r < p) if one exists,
+        or None if n is not a quadratic residue modulo p.
     """
     # Special cases
     if p == 2:
