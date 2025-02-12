@@ -1,0 +1,6 @@
+# ----------------------------------------------------------------
+# Testing – run tests using pytest directly (without uv run)
+FROM base
+CMD ["pytest"]
+
+# TODO add exmaple that people could use

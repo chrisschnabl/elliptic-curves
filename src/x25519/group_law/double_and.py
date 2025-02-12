@@ -1,4 +1,5 @@
-from util import clamp_scalar, modinv, tonelli
+from util import clamp_scalar, modinv
+from tonelli_shanks import tonelli
 
 # Prime for Curve25519 and the curve parameter A.
 p = 2**255 - 19
@@ -7,9 +8,12 @@ Point = tuple[int, int]
 
 BasePoint: Point = (
     9,
-    14781619447589544791020593568409986887264606134616475288964881837755586237401,
+    #14781619447589544791020593568409986887264606134616475288964881837755586237401,
+    43114425171068552920764898935933967039370386198203806730763910166200978582548,
 )
 
+# 431144251710685529207648989359339670393703861982038067307639101
+#66200978582548
 
 # TODO CS: here we can assume that the y is sent over the network
 # TODO CS: so we don't need to recover it
@@ -138,8 +142,9 @@ def x25519(private_key_bytes: bytes, public_key_bytes: bytes) -> tuple[bytes, by
       - Return the x-coordinate of Q as 32 bytes (little-endian).
     """
     scalar = clamp_scalar(bytearray(private_key_bytes))
-    x_coord = decode_public_key(public_key_bytes)
-    P = recover_point(x_coord)
+    #x_coord = decode_public_key(public_key_bytes)
+    #x_coord = decode_u(public_key_bytes)
+    P = recover_point(public_key_bytes[0])]
     #P = (x_coord, int.from_bytes(y_bytes, "little"))
     Q = scalar_mult(scalar, P)
     # Return the x-coordinate of the resulting point.

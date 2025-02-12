@@ -18,7 +18,8 @@ class Ed25519(SignatureScheme):
         #self.hash_function = lambda plain_text: nacl.hash.sha512(plain_text, encoder=nacl.encoding.RawEncoder)
         # somehow this fails for the invalid Signature TEST TODO CS: why?
         self._hashed_secret_key = self.hash_function(secret_key)
-        self.s_int = clamp_scalar(bytearray(self._hashed_secret_key[:32]))
+        s_bits = self._hashed_secret_key[:32]
+        self.s_int = clamp_scalar(bytearray(s_bits)
         self.public_key = self.curve.scalar_mult(self.curve.B, self.s_int)
         self.public_key = self.curve.compress(self.public_key)
 
@@ -27,11 +28,11 @@ class Ed25519(SignatureScheme):
         """
         Sign a message using Ed25519.
 
-        Steps:
-          1. Compute h = SHA512(secret_key) → (s_bits, prefix) (each 32 bytes).
+        Steps (taken from the Slide):
+          1. Compute h = SHA512(secret_key) -> (s_bits, prefix) (each 32 bytes).
           2. Clamp s_bits to get the scalar s.
-          3. Compute public key: pk = compress(s * B).
-          4. Compute nonce r = SHA512(prefix || msg) mod q.
+          3. Compute and compress public key: pk = compress(s * B).
+          4. Compute r = SHA512(prefix || msg) mod q. (q is the order of the Base Point)
           5. Compute R = compress(r * B).
           6. Compute challenge k = SHA512(R || pk || msg) mod q.
           7. Compute response t = (r + k * s) mod q.
@@ -39,7 +40,7 @@ class Ed25519(SignatureScheme):
         """
         prefix = self._hashed_secret_key[32:]
 
-        # Compute nonce r = SHA512(prefix || msg) mod q.
+        # Compute r = SHA512(prefix || msg) mod q.
         r_hash = self.hash_function(prefix + msg)
         r_int = int.from_bytes(r_hash, "little") % self.curve.q
         R_point = self.curve.scalar_mult(self.curve.B, r_int)

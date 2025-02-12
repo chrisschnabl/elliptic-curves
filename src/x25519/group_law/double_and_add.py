@@ -1,4 +1,5 @@
-from util import clamp_scalar, modinv, tonelli
+from util import clamp_scalar, modinv
+from tonelli_shanks import tonelli
 
 # Prime for Curve25519 and the curve parameter A.
 p = 2**255 - 19
@@ -8,7 +9,8 @@ Point = tuple[int, int]
 # Standard base point for Curve25519 (full coordinates).
 BasePoint: Point = (
     9,
-    14781619447589544791020593568409986887264606134616475288964881837755586237401,
+    #14781619447589544791020593568409986887264606134616475288964881837755586237401,
+    43114425171068552920764898935933967039370386198203806730763910166200978582548,
 )
 
 # We represent the point at infinity as None.
@@ -16,7 +18,7 @@ MontgomeryIdentity = None
 MontgomeryPoint = Point | None
 
 
-def decode_public_key(pk: bytes) -> Point:
+def decode_public_key_old(pk: bytes) -> Point:
     """
     Decode a public key that includes both x and y coordinates.
     Expects a 64-byte input:
@@ -24,12 +26,29 @@ def decode_public_key(pk: bytes) -> Point:
       - the next 32 bytes encode the y-coordinate (little-endian).
     Both coordinates are reduced modulo p.
     """
-    if len(pk) != 64:
-        raise ValueError("Public key must be 64 bytes (32 for x, 32 for y)")
+    #if len(pk) != 64:
+    #    raise ValueError("Public key must be 64 bytes (32 for x, 32 for y)")
     x = int.from_bytes(pk[:32], "little") % p
     y = int.from_bytes(pk[32:], "little") % p
     return (x, y)
 
+def decode_public_key(pk: bytes) -> int:
+    """
+    Decodes a 32-byte X25519 public key into an integer u-coordinate.
+    RFC 7748 requires that the most significant bit (bit 255) be cleared.
+    """
+    if len(pk) != 32:
+        raise ValueError("Public key must be 32 bytes long")
+    # Create a mutable copy and clear bit 255 of the last byte.
+    pk_bytes = bytearray(pk)
+    pk_bytes[31] &= 0x7F  # mask with 0x7F to clear the top bit
+    # Convert the little-endian byte array to an integer.
+    return int.from_bytes(pk_bytes, byteorder="little")
+
+def decode_u(u_bytes: bytes) -> int:
+    u = bytearray(u_bytes)
+    u[31] &= 127
+    return int.from_bytes(u, "little")
 
 def encode_u_coordinate(x: int) -> bytes:
     """Encode an integer x as a 32-byte little-endian byte string."""
@@ -121,7 +140,7 @@ def scalar_mult(k: int, P: MontgomeryPoint) -> MontgomeryPoint:
     return point_add(point_double(scalar_mult((k - 1) // 2, P)), P)
 
 
-def z25519(private_key_bytes: bytes, public_key_bytes: bytes) -> tuple[bytes, bytes]:
+def x25519(private_key_bytes: bytes, public_key_bytes: bytes) -> tuple[bytes, bytes]:
     """
     Compute the z25519 function using the group law on Curve25519.
     This function expects:
@@ -130,15 +149,11 @@ def z25519(private_key_bytes: bytes, public_key_bytes: bytes) -> tuple[bytes, by
     It returns a tuple (x_bytes, y_bytes) representing the resulting point.
     """
     scalar = clamp_scalar(bytearray(private_key_bytes))
-    if len(public_key_bytes) != 64:
-        raise ValueError("Public key must be 64 bytes (32 for x and 32 for y)")
-    x = int.from_bytes(public_key_bytes[:32], "little") % p
-    y = int.from_bytes(public_key_bytes[32:], "little") % p
-    P = (x, y)
+    P = recover_point(decode_public_key(public_key_bytes))
     Q = scalar_mult(scalar, P)
     if Q is None:
         raise ValueError("Resulting point is the point at infinity")
-    return (encode_u_coordinate(Q[0]), encode_u_coordinate(Q[1]))
+    return encode_u_coordinate(Q[0])
 
 def main():
     # --- Test Vector 1 ---
@@ -157,7 +172,7 @@ def main():
     P1 = recover_point(x1_int)
     public_key_bytes1 = u_bytes1 + encode_u_coordinate(P1[1])
 
-    result1 = z25519(scalar_bytes1, public_key_bytes1)
+    result1 = x25519(scalar_bytes1, public_key_bytes1)
 
     print("Test Vector 1:")
     print("Input scalar (hex):         ", scalar_hex1)

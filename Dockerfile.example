@@ -1,0 +1,10 @@
+FROM base AS production
+COPY --from=base $VIRTUAL_ENV $VIRTUAL_ENV
+
+WORKDIR $WORKDIR_PATH
+
+COPY ./src/ ./
+
+USER 10000
+
+CMD ["python", "-m", "example"]

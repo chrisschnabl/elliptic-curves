@@ -96,7 +96,6 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         py_shared1 = crypto_scalarmult(private1, dh2.public_key)
         py_shared2 = crypto_scalarmult(private2, dh1.public_key)
         
-        # Verify that our implementation and PyNaCl produce the same shared secret.
         self.assertEqual(shared1, py_shared1,
                          msg="Shared secret from our implementation (party 1) does not match PyNaCl's result.")
         self.assertEqual(shared2, py_shared2,
