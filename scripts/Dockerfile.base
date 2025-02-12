@@ -1,4 +1,4 @@
-# Adapted from 
+# Adapted from
 # https://github.com/smarlhens/python-boilerplate/blob/main/Dockerfile
 
 FROM python:3.13.1-slim-bookworm AS python-base
