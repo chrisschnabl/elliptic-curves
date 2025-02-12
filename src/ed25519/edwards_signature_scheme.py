@@ -19,7 +19,7 @@ class Ed25519(SignatureScheme):
         # somehow this fails for the invalid Signature TEST TODO CS: why?
         self._hashed_secret_key = self.hash_function(secret_key)
         s_bits = self._hashed_secret_key[:32]
-        self.s_int = clamp_scalar(bytearray(s_bits)
+        self.s_int = clamp_scalar(bytearray(s_bits))
         self.public_key = self.curve.scalar_mult(self.curve.B, self.s_int)
         self.public_key = self.curve.compress(self.public_key)
 

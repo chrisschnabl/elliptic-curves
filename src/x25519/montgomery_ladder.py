@@ -1,5 +1,7 @@
-from abc import ABC, abstractmethod
-from util import clamp_scalar, cswap, decode_u, encode_u_coordinate, modinv, projective_to_affine
+from typing import override
+from curve import AffinePoint, Curve, Point
+from util import cswap, modinv, projective_to_affine
+from x25519.x25519_curve import X25519Curve
 """
 A simple, from-scratch X25519 implementation in Python using only
 built-in big integer support and the Montgomery ladder from RFC 7748.
@@ -7,38 +9,10 @@ built-in big integer support and the Montgomery ladder from RFC 7748.
 WARNING: This code is not constant-time and is unsuitable for
 production use. It is intended only as a pedagogical reference.
 """
-
-class MontgomeryLadder(ABC):
-    def __init__(self):
-       self.p = 2**255 - 19
-       self.a24 = 121665
-
-    def __call__(self, k_bytes: bytes, u_bytes: bytes) -> bytes:
-        return self.x25519(k_bytes, u_bytes)  
-       
-    @abstractmethod
-    def scalar_mult(self, k_int: int, u_int: int) -> int:
-        raise NotImplementedError
-
-    def x25519(self, k_bytes: bytes, u_bytes: bytes) -> bytes:
-      """
-      Perform X25519 scalar multiplication using the optimized Montgomery ladder.
-
-      Steps:
-        1. Clamp the 32-byte scalar (per RFC 7748).
-        2. Decode the base points x-coordinate from u_bytes.
-        3. Run the optimized ladder to compute the scalar multiple.
-        4. Encode the resulting x-coordinate as 32 bytes.
-      """
-      k_int = clamp_scalar(bytearray(k_bytes))
-      xP = decode_u(u_bytes)
-      result_int = self.scalar_mult(k_int, xP)
-      return encode_u_coordinate(result_int)
     
-
-class MontgomeryLadderRFC7748(MontgomeryLadder):
-
-    def scalar_mult(self, k_int: int, u_int: int) -> int:
+class MontgomeryLadderRFC7748(X25519Curve):
+    @override
+    def scalar_mult(self, R: Point, scalar: int) -> Point:
         """
         Perform the Montgomery ladder (scalar multiplication) on Curve25519:
         X25519(k, u) = k * (u : 1) in the group law, returning the
@@ -46,6 +20,8 @@ class MontgomeryLadderRFC7748(MontgomeryLadder):
 
         Follows the pseudo-code in RFC 7748, section 5.
         """
+        u_int = R.x
+
         x1 = u_int
         x2, z2 = 1, 0
         x3, z3 = u_int, 1
@@ -57,7 +33,7 @@ class MontgomeryLadderRFC7748(MontgomeryLadder):
         # TODO: this works, but we can do better, e.g. look at Martin's tutorial
         # this is basically from the RF
         for t in reversed(range(255)):
-            k_t = (k_int >> t) & 1
+            k_t = (scalar >> t) & 1
             if k_t != swap:
                 x2, x3 = x3, x2
                 z2, z3 = z3, z2
@@ -91,12 +67,12 @@ class MontgomeryLadderRFC7748(MontgomeryLadder):
         # We use Fermat's little theorem for the inverse: z2^(p-2) mod p
         # inv_z2 = pow(z2, P - 2, P)
         inv_z2: int = modinv(z2, self.p)
-        return (x2 * inv_z2) % self.p
+        x = (x2 * inv_z2) % self.p
+        return AffinePoint(x, 0)
 
+class MontgomeryLadderOptimized(X25519Curve):
 
-class MontgomeryLadderOptimized(MontgomeryLadder):
-
-    def scalar_mult(self, k_int: int, xP: int) -> int:
+    def scalar_mult(self, R: Point, scalar: int) -> Point:
         """
         Compute scalar multiplication using an optimized Montgomery ladder.
 
@@ -113,13 +89,13 @@ class MontgomeryLadderOptimized(MontgomeryLadder):
         """
         # Initialize state
         a = 1
-        b = xP
+        b = R.x
         c = 0
         d = 1
 
         # Process bits 254 down to 0
         for i in range(254, -1, -1):
-            bit = (k_int >> i) & 1
+            bit = (scalar >> i) & 1
 
             # --- Pre-step swap (if bit==1) ---
             a, b = cswap(bit, a, b, self.p)
@@ -159,7 +135,7 @@ class MontgomeryLadderOptimized(MontgomeryLadder):
             # v16 = v5 * v6
             a = d * f_val % self.p
             # v17 = v11 * xP
-            d = b * xP % self.p
+            d = b * R.x % self.p
             # v18 = (v9)^2
             b = e * e % self.p
             # --- Final swap (if bit==1) ---
@@ -169,11 +145,12 @@ class MontgomeryLadderOptimized(MontgomeryLadder):
 
         # After the loop, a and c are the numerator and denominator.
         inv_c = modinv(c, self.p)
-        return a * inv_c % self.p
+        x = a * inv_c % self.p
+        return AffinePoint(x, 0)
     
 
 
-class MontgomeryLadderMKTutorial(MontgomeryLadder):
+class MontgomeryLadderMKTutorial(X25519Curve):
     # This is 10 multiplications
     def ladder_step(self, X0: int, Z0: int, X1: int, Z1: int, xP: int) -> tuple[int, int, int, int]:
         """
@@ -220,7 +197,7 @@ class MontgomeryLadderMKTutorial(MontgomeryLadder):
 
         return new_X0, new_Z0, new_X1, new_Z1
 
-    def scalar_mult(self, k_int: int, u_int: int) -> int:
+    def scalar_mult(self, R: Point, scalar: int) -> Point:
         """
         Compute the X25519 scalar multiplication using the Montgomery ladder.
         
@@ -238,7 +215,7 @@ class MontgomeryLadderMKTutorial(MontgomeryLadder):
         
         Finally, the resulting projective coordinate R0 is converted back to affine.
         """
-        xP = u_int  # The base point's affine x-coordinate
+        xP = R.x  # The base point's affine x-coordinate
 
         # Initialize projective points: R0 = (1:0), R1 = (xP:1)
         X0, Z0 = 1, 0
@@ -247,7 +224,7 @@ class MontgomeryLadderMKTutorial(MontgomeryLadder):
         swap = 0
         # Process 255 bits (bit 254 down to 0, since the scalar is clamped)
         for t in reversed(range(255)):
-            k_t = (k_int >> t) & 1
+            k_t = (scalar >> t) & 1
             swap_bit = swap ^ k_t
 
             # Conditionally swap the points based on the current bit.
@@ -263,4 +240,5 @@ class MontgomeryLadderMKTutorial(MontgomeryLadder):
         Z0, Z1 = cswap(swap, Z0, Z1, self.p)
 
         # Convert R0 from projective to affine coordinates.
-        return projective_to_affine(X0, Z0, self.p)
+        x = projective_to_affine(X0, Z0, self.p)
+        return AffinePoint(x, 0)

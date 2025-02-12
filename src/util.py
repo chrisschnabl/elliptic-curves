@@ -20,7 +20,7 @@ def clamp_scalar(k: bytearray) -> int:
 
     Returns an integer (little-endian).
     """
-
+    # TODO: documetn this
     k[0] &= 248
     k[31] &= 127
     k[31] |= 64
@@ -41,6 +41,7 @@ def sqrt_mod(a: int, p: int) -> int:
       Otherwise, raise an error.
 
     This method works for p = 2^255 - 19 (I guess)
+    For general form, use Tonelli-Shanks
     """
 
     exp = (p + 3) // 8
@@ -71,6 +72,7 @@ def decode_public_key(u_bytes: bytes, p: int) -> int:
     return u_int % p
 
 
+
 def encode_u_coordinate(x: int) -> bytes:
     """Encode an integer x as a 32-byte little-endian byte string."""
     return x.to_bytes(32, "little")
@@ -87,4 +89,5 @@ def projective_to_affine(X: int, Z: int, p: int) -> tuple[int, int]:
     """
     Convert a projective coordinate (X:Z) to an affine coordinate x = X/Z mod P.
     """
+    # TODO: check potential oerlaps with ed25519
     return (X *  modinv(Z, p)) % p
