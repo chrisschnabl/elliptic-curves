@@ -64,6 +64,7 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
     )
+
     def test_rfc7748_iterative(self, name, impl):
         # Initial values for k and u as specified in RFC 7748 Section 5.2
         k = unhexlify("0900000000000000000000000000000000000000000000000000000000000000")
@@ -112,6 +113,8 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
 
         # Number of random test cases
         num_tests = 2_000
+
+        # TODO: also sample random points (that are valid points on the curve)
 
         for i in range(num_tests):
             k_bytes = os.urandom(32)

@@ -2,10 +2,8 @@ from typing import override
 from curve import AffinePoint, Curve, Point
 from util import cswap, modinv, projective_to_affine
 from x25519.x25519_curve import X25519Curve
-"""
-A simple, from-scratch X25519 implementation in Python using only
-built-in big integer support and the Montgomery ladder from RFC 7748.
 
+"""
 WARNING: This code is not constant-time and is unsuitable for
 production use. It is intended only as a pedagogical reference.
 """

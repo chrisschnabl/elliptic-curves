@@ -1,5 +1,6 @@
 from typing import override
-from ed25519.edwards_curve import EdwardsCurve, AffinePoint, Point, IdentityPoint
+from curve import AffinePoint, Point, IdentityPoint
+from ed25519.edwards_curve import EdwardsCurve
 from util import modinv, sqrt_mod
 
 class AffineEdwardsCurve(EdwardsCurve):

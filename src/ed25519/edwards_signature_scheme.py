@@ -1,7 +1,7 @@
 from ed25519.affine_edwards_curve import AffineEdwardsCurve
 from ed25519.edwards_curve import EdwardsCurve
 from ed25519.extended_edwards_curve import ExtendedEdwardsCurve
-from ed25519.signature_scheme import SignatureScheme
+from signature_scheme import SignatureScheme
 import nacl.hash
 from util import clamp_scalar
 import hashlib

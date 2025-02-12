@@ -2,9 +2,12 @@ from abc import ABC, abstractmethod
 from util import clamp_scalar, decode_u, modinv, encode_u_coordinate
 from curve import AffinePoint, Curve, IdentityPoint
 
-# Needs to be implemnt with scalar mult
 
 class X25519Curve(Curve):
+    """
+    An X25519 is a curve of form X25519, that provides the x25519 method
+    It takes bytes and returns bytes accoridng to the RFC7748 and uses some scalar_mult method
+    """
     def __init__(self):
        self.p = 2**255 - 19
        self.a24 = 121665
@@ -15,6 +18,7 @@ class X25519Curve(Curve):
     def recover_point(self, x: int) -> AffinePoint:
         return AffinePoint(x, 0)
     
+    # For fun we could also transform between X25519 and Edwards25519
     def x25519(self, private_key_bytes: bytes, public_key_bytes: bytes) -> bytes:
       """
       Perform X25519 scalar multiplication using the optimized Montgomery ladder.

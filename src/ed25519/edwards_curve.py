@@ -9,7 +9,6 @@ class ExtendedPoint(AffinePoint):
     z: int
     t: int
 
-
 class EdwardsCurve(DoubleAndAddCurve):
     """
     Abstract interface for a point on an Edwards curve.

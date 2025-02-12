@@ -24,7 +24,7 @@ class TestEd25519Implementation(unittest.TestCase):
         nacl_signing_key = SigningKey(seed)
         nacl_public_key = nacl_signing_key.verify_key.encode()  # 32-byte public key
 
-        custom_signer = Ed25519(secret_key=seed)
+        custom_signer = Ed25519(secret_key=seed, curve=curve)
 
         # Check that both implementations produce the same public key.
         self.assertEqual(

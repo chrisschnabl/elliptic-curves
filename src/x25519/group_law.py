@@ -1,7 +1,7 @@
     
 from typing import override
 from curve import AffinePoint, Point, IdentityPoint, DoubleAndAddCurve
-from tonelli_shanks import tonelli
+from tonelli import tonelli
 from util import modinv
 
 from x25519.x25519_curve import X25519Curve
@@ -43,7 +43,7 @@ class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):
             raise ValueError("No valid y for given x")
         
         # Choose the smaller square root, but should be the same
-        if y > self.p - y:
+        if y < self.p - y:
             y = self.p - y
         return AffinePoint(x, y)
 

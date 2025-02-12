@@ -1,5 +1,5 @@
 from typing import Optional
-from x25519.diffie_hellman import DiffieHellman
+from diffie_hellman import DiffieHellman
 from x25519.montgomery_ladder import MontgomeryLadderRFC7748
 from x25519.x25519_curve import X25519Curve
 
@@ -25,7 +25,7 @@ class EllipticCurveDiffieHellman(DiffieHellman):
             ladder (Optional[MontgomeryLadder]): An instance of the Montgomery ladder.
         """
         super().__init__(private_key)
-        self.x25519 = curve if curve is not None else X25519Curve(MontgomeryLadderRFC7748())
+        self.x25519 = curve if curve is not None else MontgomeryLadderRFC7748()
         self.public_key = self.compute_public_key()
 
     def compute_public_key(self) -> bytes:

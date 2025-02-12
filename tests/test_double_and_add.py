@@ -1,13 +1,10 @@
-from binascii import unhexlify
 import unittest
 
-from util import encode_u_coordinate
-from x25519.double_and import BasePoint, point_add, point_double, recover_point, scalar_mult
+from x25519.group_law import X25519CurveGroupLaw
 
 class TestMontgomeryCurveOperations(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        self.p = 2**255 - 19
-        self.A = 486662
+        self.curve = X25519CurveGroupLaw()
         super().__init__(*args, **kwargs)
 
     def test_recover_point_base(self):
@@ -15,10 +12,10 @@ class TestMontgomeryCurveOperations(unittest.TestCase):
         Test that given the base x-coordinate (9), recover_point returns the
         full affine point (x,y) as specified by RFC 7748.
         """
-        P = recover_point(9)
+        P = self.curve.recover_point(9)
         self.assertEqual(
             P, 
-            BasePoint, 
+            self.curve.B, 
             "recover_point(9) did not return the expected BasePoint."
         )
     
@@ -28,9 +25,10 @@ class TestMontgomeryCurveOperations(unittest.TestCase):
         satisfies the curve equation: y^2 = x^3 + A*x^2 + x  mod p.
         """
         # Test on the base point.
-        x, y = recover_point(9)
-        lhs = (y * y) % self.p
-        rhs = (pow(x, 3, self.p) + self.A * pow(x, 2, self.p) + x) % self.p
+        P = self.curve.recover_point(9)
+        x, y = P.x, P.y
+        lhs = (y * y) % self.curve.p
+        rhs = (pow(x, 3, self.curve.p) + self.curve.A * pow(x, 2, self.curve.p) + x) % self.curve.p
         self.assertEqual(lhs, rhs, "The recovered point does not lie on the curve.")
     
     def test_point_double(self):
@@ -38,12 +36,12 @@ class TestMontgomeryCurveOperations(unittest.TestCase):
         Test that doubling the BasePoint yields a point that lies on the curve.
         (Also indirectly tests the modular inversion and tonelli routines.)
         """
-        D = point_double(BasePoint)
+        D = self.curve.double(self.curve.B)
         # We expect a non-infinity result for the base point doubling.
         self.assertIsNotNone(D, "Doubling BasePoint returned the point at infinity unexpectedly.")
-        x, y = D
-        lhs = (y * y) % self.p
-        rhs = (pow(x, 3, self.p) + self.A * pow(x, 2, self.p) + x) % self.p
+        x, y = D.x, D.y
+        lhs = (y * y) % self.curve.p
+        rhs = (pow(x, 3, self.curve.p) + self.curve.A * pow(x, 2, self.curve.p) + x) % self.curve.p
         self.assertEqual(lhs, rhs, "The doubled point does not lie on the curve.")
     
     def test_point_add(self):
@@ -52,8 +50,8 @@ class TestMontgomeryCurveOperations(unittest.TestCase):
         Since adding the BasePoint to itself should be equivalent to doubling it,
         we verify that point_add(BasePoint, BasePoint) equals point_double(BasePoint).
         """
-        S = point_add(BasePoint, BasePoint)
-        D = point_double(BasePoint)
+        S = self.curve.add(self.curve.B, self.curve.B)
+        D = self.curve.double(self.curve.B)
         self.assertEqual(S, D, "Point addition (P + P) does not equal point doubling.")
     
     def test_scalar_mult_basic(self):
@@ -63,12 +61,12 @@ class TestMontgomeryCurveOperations(unittest.TestCase):
          - 2 * P should equal point_double(P).
          Also check that a multiple (e.g. 3*P) yields a point on the curve.
         """
-        P = BasePoint
-        self.assertEqual(scalar_mult(1, P), P, "1*P does not equal P.")
-        self.assertEqual(scalar_mult(2, P), point_double(P), "2*P does not equal point_double(P).")
+        P = self.curve.B
+        self.assertEqual(self.curve.scalar_mult(P, 1), P, "1*P does not equal P.")
+        self.assertEqual(self.curve.scalar_mult(P, 2), self.curve.double(P), "2*P does not equal point_double(P).")
         
-        P3 = scalar_mult(3, P)
-        x, y = P3
-        lhs = (y * y) % self.p
-        rhs = (pow(x, 3, self.p) + self.A * pow(x, 2, self.p) + x) % self.p
+        P3 = self.curve.scalar_mult(P, 3)
+        x, y = P3.x, P3.y
+        lhs = (y * y) % self.curve.p
+        rhs = (pow(x, 3, self.curve.p) + self.curve.A * pow(x, 2, self.curve.p) + x) % self.curve.p
         self.assertEqual(lhs, rhs, "3*P does not lie on the curve.")
