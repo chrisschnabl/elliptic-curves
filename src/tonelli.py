@@ -11,11 +11,14 @@ def decompose(n: int) -> tuple[int, int]:
     Returns:
         A tuple (q, s) such that n = q * 2^s and q is odd.
     """
+    if n < 0:
+        raise ValueError(f"n must be positive, but got n = {n}")
+
     s = 0
     while n % 2 == 0:
         s += 1
         n //= 2
-    return n, s  # Here, n is the odd factor q.
+    return n, s
 
 
 def legendre(a: int, p: int) -> int:
@@ -54,7 +57,7 @@ def is_quadratic_residue(n: int, p: int) -> bool:
     Check if n is a quadratic residue modulo p.
 
     Args:
-        n: The integer to test.
+        n: integer to test.
         p: A prime number.
 
     Returns:
@@ -84,18 +87,17 @@ def find_nonsquare(p: int) -> int:
     for z in range(2, p):
         if legendre_symbol(z, p) == -1:
             return z
+
     raise ValueError(f"Could not find a quadratic non-residue modulo {p}")
 
 
 def tonelli(n: int, p: int) -> int | None:
     """
-    Solve for a square root r of n modulo p, i.e. find r such that r^2 ≡ n (mod p).
+    Solve for a square root r of n modulo p, i.e. find r such that r^2 = n (mod p).
 
     For an odd prime p and a quadratic residue n modulo p,
     there are two solutions: r and p - r.
-    This function returns one of the solutions.
-    (The other solution can be obtained as p - r.)
-    For p == 2, the solution is trivially n mod 2.
+    This function returns the smaller solution.
 
     Args:
         n: The integer whose square root modulo p is to be computed.
@@ -113,7 +115,6 @@ def tonelli(n: int, p: int) -> int | None:
     if not is_quadratic_residue(n, p):
         return None
 
-    # For primes where p % 4 == 3, a direct solution exists.
     if p % 4 == 3:
         return pow(n, (p + 1) // 4, p)
 
@@ -123,15 +124,13 @@ def tonelli(n: int, p: int) -> int | None:
     # Find a quadratic non-residue z modulo p.
     z = find_nonsquare(p)
 
-    # Initialize variables for the Tonelli-Shanks algorithm.
     c = pow(z, q, p)
     r = pow(n, (q + 1) // 2, p)
     t = pow(n, q, p)
     m = s
 
-    # Main loop: update r, t, c until t becomes 1.
     while t != 1:
-        # Find the smallest integer i (0 < i < m) such that t^(2^i) ≡ 1 (mod p).
+        # Find the smallest integer i (0 < i < m) such that t^(2^i) = 1 (mod p).
         i = 0
         temp = t
         while temp != 1:
@@ -143,10 +142,9 @@ def tonelli(n: int, p: int) -> int | None:
         # Compute b = c^(2^(m-i-1)) mod p.
         b = pow(c, 1 << (m - i - 1), p)
 
-        # Update r, t, c, and m.
         r = (r * b) % p
         t = (t * b * b) % p
         c = (b * b) % p
         m = i
 
-    return r
+    return min(r, p - r)

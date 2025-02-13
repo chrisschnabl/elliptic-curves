@@ -7,14 +7,13 @@ from tonelli import tonelli
 
 
 class TestTonelliShanks(unittest.TestCase):
-    def _test_tonelli_shanks_against_naive(self) -> None:
+    def test_tonelli_shanks_against_naive(self) -> None:
         p = 2**255 - 19
         # We only need this to work for 2^255 - 19, lol
         # But should work WLOG (trust me, bro)
-        # TODO CS: this does not wokr
 
-        for _ in range(2, 1_000):
-            n = random.randint(1, 10_000_000)
+        for _ in range(2, 2000):
+            n = random.randint(1, 100_000_000)
             ts = tonellishanks(n, p)
             t = ts**2 % p if ts is not None else None
             res = tonelli(n, p)
