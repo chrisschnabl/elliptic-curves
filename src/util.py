@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------
-# Constant-time conditional swap (not truly constant-time in Python)
+# Non constant-time conditional swap
 # -------------------------------------------------------------------
 def cswap(swap: int, x: int, y: int, p: int) -> tuple[int, int]:
     """
@@ -10,6 +10,7 @@ def cswap(swap: int, x: int, y: int, p: int) -> tuple[int, int]:
     x_new = (x - dummy) % p
     y_new = (y + dummy) % p
     return x_new, y_new
+
 
 def clamp_scalar(k: bytearray) -> int:
     """
@@ -25,6 +26,7 @@ def clamp_scalar(k: bytearray) -> int:
     k[31] &= 127
     k[31] |= 64
     return int.from_bytes(k, "little")
+
 
 def modinv(x: int, p: int) -> int:
     """Modular inverse modulo p (p is prime)."""
@@ -53,6 +55,7 @@ def sqrt_mod(a: int, p: int) -> int:
         return (r * sqrt_m1) % p
     raise ValueError("No square root exists for the given input.")
 
+
 def decode_u(u_bytes: bytes) -> int:
     """
     Decode a 32-byte little-endian string into an integer.
@@ -61,6 +64,7 @@ def decode_u(u_bytes: bytes) -> int:
     u = bytearray(u_bytes)
     u[31] &= 127
     return int.from_bytes(u, "little")
+
 
 def decode_public_key(u_bytes: bytes, p: int) -> int:
     """
@@ -72,10 +76,10 @@ def decode_public_key(u_bytes: bytes, p: int) -> int:
     return u_int % p
 
 
-
 def encode_u_coordinate(x: int) -> bytes:
     """Encode an integer x as a 32-byte little-endian byte string."""
     return x.to_bytes(32, "little")
+
 
 # --- Conversion Helpers ---
 def affine_to_projective(x: int) -> tuple[int, int]:
@@ -85,9 +89,8 @@ def affine_to_projective(x: int) -> tuple[int, int]:
     """
     return (x, 1)
 
-def projective_to_affine(X: int, Z: int, p: int) -> tuple[int, int]:
-    """
-    Convert a projective coordinate (X:Z) to an affine coordinate x = X/Z mod P.
-    """
+
+def projective_to_affine(X: int, Z: int, p: int) -> int:
+    """Convert a projective coordinate (X:Z) to an affine coordinate x = X/Z mod P."""
     # TODO: check potential oerlaps with ed25519
-    return (X *  modinv(Z, p)) % p
+    return (X * modinv(Z, p)) % p

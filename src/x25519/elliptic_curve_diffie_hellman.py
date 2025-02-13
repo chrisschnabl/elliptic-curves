@@ -7,8 +7,8 @@ class EllipticCurveDiffieHellman(DiffieHellman):  # type: ignore
     """
     A Diffie=Hellman abstraction for the X25519 key exchange.
 
-    This class uses a Montgomery ladder for scalar multiplication to provide:
-      - Generate a random 32-byte private key (use better randomness here for production)
+    This class uses a provided curve for scalar multiplication and:
+      - Generates a random 32-byte private key (use better randomness here for production)
       - Derive the corresponding 32-byte public key.
       - Derive of a shared secret
     """
@@ -38,7 +38,7 @@ class EllipticCurveDiffieHellman(DiffieHellman):  # type: ignore
         Returns:
             bytes: The 32-byte public key.
         """
-        base_point = b"\x09" + (b"\x00" * 31)
+        base_point = b"\x09" + (b"\x00" * 31)  # TODO CS: re-use the curve's base point
         return self.x25519.x25519(self.private_key, base_point)  # type: ignore
 
     def generate_shared_secret(self, peer_public_key: bytes) -> bytes:
