@@ -16,7 +16,9 @@ Point = AffinePoint | None
 
 
 class Curve(ABC):
-    """Curve is anything that we can use to do scalar multiplication"""
+    """
+    Curve is anything that we can use to do scalar multiplication.
+    """
 
     @abstractmethod
     def scalar_mult(self, R: Point, scalar: int) -> Point:
@@ -26,8 +28,9 @@ class Curve(ABC):
 class DoubleAndAddCurve(Curve):
     """
     A curve "trait" that implements scalar multiplication using the double-and-add method.
-    Sub-class must provide an add implementation
-    and should override double for performance.
+
+    Sub-class must provide an add implementation and should override double for
+    performance.
     """
 
     @abstractmethod

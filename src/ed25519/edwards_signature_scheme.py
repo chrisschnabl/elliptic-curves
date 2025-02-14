@@ -1,28 +1,38 @@
+import hashlib
+from collections.abc import Callable
+
 from ed25519.affine_edwards_curve import AffineEdwardsCurve
 from ed25519.edwards_curve import EdwardsCurve
-from ed25519.extended_edwards_curve import ExtendedEdwardsCurve
+from keys import PrivateKey, PublicKey
 from signature_scheme import SignatureScheme
-import nacl.hash
 from util import clamp_scalar
-import hashlib
-class Ed25519(SignatureScheme):
+
+
+class Ed25519(SignatureScheme):  # type: ignore
     """
     An implementation of the Ed25519 signature scheme.
 
     This class uses an EdwardsCurve instance for all curve arithmetic.
     """
 
-    def __init__(self, secret_key: bytes, curve: EdwardsCurve = AffineEdwardsCurve()):
-        self.curve = curve
-        self.hash_function = lambda plain_text: hashlib.sha512(plain_text).digest()
-        #self.hash_function = lambda plain_text: nacl.hash.sha512(plain_text, encoder=nacl.encoding.RawEncoder)
+    def __init__(
+        self, secret_key: PrivateKey, curve: EdwardsCurve = AffineEdwardsCurve()
+    ):
+        self.curve: EdwardsCurve = curve
+
+        def hash_function(plain_text: bytes) -> bytes:
+            return hashlib.sha512(plain_text).digest()
+
+        self.hash_function: Callable[[bytes], bytes] = hash_function
+
+        # self.hash_function =
+        # #nacl.hash.sha512(plain_text, encoder=nacl.encoding.RawEncoder)
         # somehow this fails for the invalid Signature TEST TODO CS: why?
         self._hashed_secret_key = self.hash_function(secret_key)
         s_bits = self._hashed_secret_key[:32]
         self.s_int = clamp_scalar(bytearray(s_bits))
         self.public_key = self.curve.scalar_mult(self.curve.B, self.s_int)
         self.public_key = self.curve.compress(self.public_key)
-
 
     def sign(self, msg: bytes) -> bytes:
         """
@@ -54,9 +64,9 @@ class Ed25519(SignatureScheme):
         t_int = (r_int + k_int * self.s_int) % self.curve.q
         t_bytes = t_int.to_bytes(32, "little")
 
-        return R_comp + t_bytes
+        return R_comp + t_bytes  # type: ignore
 
-    def verify(self, sig: bytes, msg: bytes, pk: bytes) -> bool:
+    def verify(self, sig: bytes, msg: bytes, pk: PublicKey) -> bool:
         """
         Verify an Ed25519 signature.
 
@@ -86,12 +96,14 @@ class Ed25519(SignatureScheme):
         k_int = int.from_bytes(k_hash, "little") % self.curve.q
 
         # Compute left-hand side: [t]B.
-        LHS = self.curve.scalar_mult(self.curve.B, t_int) # B is extended homogeneous coordinates
+        LHS = self.curve.scalar_mult(
+            self.curve.B, t_int
+        )  # B is extended homogeneous coordinates
         # Compute right-hand side: R + [k]A.
         kA = self.curve.scalar_mult(A, k_int)
         RHS = self.curve.add(R, kA)
 
-        return self.curve.point_equals(LHS, RHS)  # Fails if lambda scalar scales the projective coordinates
-    
-    def get_public_key(self) -> bytes:
+        return self.curve.point_equals(LHS, RHS)  # type: ignore
+
+    def get_public_key(self) -> PublicKey:
         return self.public_key

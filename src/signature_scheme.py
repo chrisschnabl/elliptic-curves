@@ -1,16 +1,18 @@
 from abc import ABC, abstractmethod
 
+from keys import PrivateKey, PublicKey
+
+
 class SignatureScheme(ABC):
-    
-    def __init__(self):
-        self.secret_key = None
-        
+    secret_key: PrivateKey
+    public_key: PublicKey
+
     @abstractmethod
     def sign(self, msg: bytes) -> bytes:
         pass
 
     @abstractmethod
-    def verify(self, sig: bytes, msg: bytes, pk: bytes) -> bool:
+    def verify(self, sig: bytes, msg: bytes, pk: PublicKey) -> bool:
         pass
 
     @abstractmethod

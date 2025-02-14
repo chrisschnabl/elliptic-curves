@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
-import os
-from typing import Optional
+
+from keys import PrivateKey, PublicKey, SharedKey
 
 
 class DiffieHellman(ABC):
-    def __init__(self, private_key: Optional[bytes] = None):
-        self.private_key = private_key if private_key is not None else os.urandom(32)
+    def __init__(self, private_key: PrivateKey):
+        self.private_key = private_key
 
     @abstractmethod
-    def generate_shared_secret(self, peer_public_key: bytes) -> bytes:
+    def generate_shared_secret(self, peer_public_key: PublicKey) -> SharedKey:
         raise NotImplementedError
-    
+
     @abstractmethod
-    def compute_public_key(self) -> bytes:
+    def _compute_public_key(self) -> PublicKey:
         raise NotImplementedError

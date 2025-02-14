@@ -17,9 +17,7 @@ class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):  # type: ignore
         )
 
     @override  # type: ignore
-    def decode_public_key(self, public_key_bytes: bytes) -> int:
-        if len(public_key_bytes) != 32:
-            raise ValueError("Public key must be 32 bytes long")
+    def decode_public_key_bytes(self, public_key_bytes: bytes) -> int:
         # Create a mutable copy and clear bit 255 of the last byte.
         pk_bytes = bytearray(public_key_bytes)
         pk_bytes[31] &= 0x7F  # mask with 0x7F to clear the top bit
@@ -30,8 +28,8 @@ class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):  # type: ignore
     def recover_point(self, x: int) -> Point:
         """
         Given an x-coordinate, recover a point (x,y) on the curve defined by:
-                y² = x³ + A*x² + x   (mod p)
-        by computing a square root of the right-hand side.
+
+        y² = x³ + A*x² + x   (mod p) by computing a square root of the right-hand side.
         (If there is no square root, a ValueError is raised.)
         """
         rhs = (pow(x, 3, self.p) + self.A * pow(x, 2, self.p) + x) % self.p
@@ -47,8 +45,9 @@ class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):  # type: ignore
     @override  # type: ignore
     def add(self, P: Point, Q: Point) -> Point:
         """
-        Add two points P and Q (affine coordinates) on the Montgomery curve:
-            y**2 = x**3 + A*x*x + x   (mod p)
+        Add two points P and Q (affine coordinates) on the Montgomery curve: y**2 = x**3 +
+        A*x*x + x   (mod p)
+
         For distinct points:
             λ = (y_2 - y_1) / (x_2 - x_1) mod p,
             x₃ = λ*λ - A - x_1 - x_2 mod p,

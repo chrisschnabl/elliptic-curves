@@ -15,8 +15,6 @@ dependencies = [
     "tonellishanks>=0.1.1",
 ]
 
-# TODO CS: move to workspaces
-
 [project.urls]
 homepage = "https://github.com/chrisschnabl/elliptic-curves#readme"
 repository = "https://github.com/chrisschnabl/elliptic-curves"

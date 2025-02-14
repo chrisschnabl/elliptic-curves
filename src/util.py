@@ -4,6 +4,7 @@
 def cswap(swap: int, x: int, y: int, p: int) -> tuple[int, int]:
     """
     Swap x and y if swap == 1, otherwise leave them unchanged.
+
     (Uses arithmetic so that both branches perform the same operations.)
     """
     dummy = swap * (x - y)
@@ -29,7 +30,9 @@ def clamp_scalar(k: bytearray) -> int:
 
 
 def modinv(x: int, p: int) -> int:
-    """Modular inverse modulo p (p is prime)."""
+    """
+    Modular inverse modulo p (p is prime).
+    """
     return pow(x, p - 2, p)
 
 
@@ -59,6 +62,7 @@ def sqrt_mod(a: int, p: int) -> int:
 def decode_u(u_bytes: bytes) -> int:
     """
     Decode a 32-byte little-endian string into an integer.
+
     (Mask off the high bit per RFC 7748.)
     """
     u = bytearray(u_bytes)
@@ -66,18 +70,10 @@ def decode_u(u_bytes: bytes) -> int:
     return int.from_bytes(u, "little")
 
 
-def decode_public_key(u_bytes: bytes, p: int) -> int:
-    """
-    Decode a 32-byte public key: interpret as little-endian integer,
-    clear the most significant bit, then reduce modulo p.
-    """
-    u_int = int.from_bytes(u_bytes, "little")
-    u_int &= (1 << 255) - 1
-    return u_int % p
-
-
 def encode_u_coordinate(x: int) -> bytes:
-    """Encode an integer x as a 32-byte little-endian byte string."""
+    """
+    Encode an integer x as a 32-byte little-endian byte string.
+    """
     return x.to_bytes(32, "little")
 
 
@@ -85,12 +81,15 @@ def encode_u_coordinate(x: int) -> bytes:
 def affine_to_projective(x: int) -> tuple[int, int]:
     """
     Convert an affine coordinate to a projective coordinate.
+
     Given x (affine), return (X:Z) with Z = 1.
     """
     return (x, 1)
 
 
 def projective_to_affine(X: int, Z: int, p: int) -> int:
-    """Convert a projective coordinate (X:Z) to an affine coordinate x = X/Z mod P."""
+    """
+    Convert a projective coordinate (X:Z) to an affine coordinate x = X/Z mod P.
+    """
     # TODO: check potential oerlaps with ed25519
     return (X * modinv(Z, p)) % p

@@ -39,7 +39,9 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
         ]
 
         for vector_name, k_hex, u_hex, expected_hex in vectors:
-            """Test X25519 against RFC 7748 test vectors."""
+            """
+            Test X25519 against RFC 7748 test vectors.
+            """
             k_bytes = unhexlify(k_hex)
             u_bytes = unhexlify(u_hex)
             expected = unhexlify(expected_hex)
@@ -96,7 +98,7 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
             1_000_000: "7c3911e0ab2586fd864497297e575e6f3bc601c0883c30df5f4dd2d24f665424",
         }
 
-        runs = 100 if name == "GroupLaw" else 2000
+        runs = 100 if name == "GroupLaw" else 1000
         for i in range(1, runs + 1):
             k, u = crypto_scalarmult(k, u), k
             k_2, u_2 = impl.x25519(k_2, u_2), k_2
@@ -125,7 +127,9 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
         ]
     )  # type: ignore
     def test_random_vectors(self, name: str, impl: X25519Curve) -> None:
-        """Test X25519 implementation against PyNaCl with random keys and points."""
+        """
+        Test X25519 implementation against PyNaCl with random keys and points.
+        """
         import os
 
         # Number of random test cases

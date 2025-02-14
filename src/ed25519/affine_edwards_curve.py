@@ -1,14 +1,18 @@
 from typing import override
-from curve import AffinePoint, Point, IdentityPoint
+
+from curve import AffinePoint, IdentityPoint, Point
 from ed25519.edwards_curve import EdwardsCurve
 from util import modinv, sqrt_mod
 
-class AffineEdwardsCurve(EdwardsCurve):
+
+class AffineEdwardsCurve(EdwardsCurve):  # type: ignore
     """
     Point represented in affine coordinates.
-    Carries a reference to the underlying curve.
-    Arithmetic is implemented via conversion to extended coordinates.
+
+    Carries a reference to the underlying curve. Arithmetic is implemented via conversion
+    to extended coordinates.
     """
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -37,7 +41,7 @@ class AffineEdwardsCurve(EdwardsCurve):
         return AffinePoint(x3, y3)
 
     @override
-    def double(self, R: Point) -> Point:
+    def double(self, R: Point) -> Point:  # type: ignore
         # TODO CS: Implement this in faster
         # x3 = (x1*y1+y1*x1)/(1+d*x1*x1*y1*y1)
         # y3 = (y1*y1-a*x1*x1)/(1-d*x1*x1*y1*y1) from
@@ -65,7 +69,7 @@ class AffineEdwardsCurve(EdwardsCurve):
         """
         if P is IdentityPoint:
             raise ValueError("Cannot compress Identity Element")
-        
+
         x, y = P.x, P.y
         y_bytes = y.to_bytes(32, "little")
         y_arr = bytearray(y_bytes)
@@ -109,8 +113,8 @@ class AffineEdwardsCurve(EdwardsCurve):
         return AffinePoint(x, dx)
 
     @override
-    def point_equals(self, P: Point, Q: Point) -> bool:
+    def point_equals(self, P: Point, Q: Point) -> bool:  # type: ignore
         if P is IdentityPoint or Q is IdentityPoint:
             return True
-        
-        return P.x == Q.x and P.y == Q.y
+
+        return P.x == Q.x and P.y == Q.y  # type: ignore

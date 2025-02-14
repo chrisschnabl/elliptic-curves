@@ -1,5 +1,4 @@
-from typing import override
-from curve import AffinePoint, Curve, Point
+from curve import AffinePoint, Point
 from util import cswap, modinv, projective_to_affine
 from x25519.x25519_curve import X25519Curve
 
@@ -7,14 +6,14 @@ from x25519.x25519_curve import X25519Curve
 WARNING: This code is not constant-time and is unsuitable for
 production use. It is intended only as a pedagogical reference.
 """
-    
-class MontgomeryLadderRFC7748(X25519Curve):
-    @override
+
+
+class MontgomeryLadderRFC7748(X25519Curve):  # type: ignore
     def scalar_mult(self, R: Point, scalar: int) -> Point:
         """
-        Perform the Montgomery ladder (scalar multiplication) on Curve25519:
-        X25519(k, u) = k * (u : 1) in the group law, returning the
-        resulting u-coordinate as an integer.
+        Perform the Montgomery ladder (scalar multiplication) on Curve25519: X25519(k, u)
+        = k * (u : 1) in the group law, returning the resulting u-coordinate as an
+        integer.
 
         Follows the pseudo-code in RFC 7748, section 5.
         """
@@ -46,7 +45,7 @@ class MontgomeryLadderRFC7748(X25519Curve):
             E = (AA - BB) % self.p
             C = (x3 + z3) % self.p
             D = (x3 - z3) % self.p
-            DA = (D * A) % self.p    
+            DA = (D * A) % self.p
             CB = (C * B) % self.p
             x3 = (DA + CB) % self.p
             x3 = (x3 * x3) % self.p
@@ -68,8 +67,8 @@ class MontgomeryLadderRFC7748(X25519Curve):
         x = (x2 * inv_z2) % self.p
         return AffinePoint(x, 0)
 
-class MontgomeryLadderOptimized(X25519Curve):
 
+class MontgomeryLadderOptimized(X25519Curve):  # type: ignore
     def scalar_mult(self, R: Point, scalar: int) -> Point:
         """
         Compute scalar multiplication using an optimized Montgomery ladder.
@@ -79,10 +78,10 @@ class MontgomeryLadderOptimized(X25519Curve):
         c = 0,    d = 1.
         (This corresponds to representing the “point-at-infinity” as (1:0) and the
         base point in projective coordinates as (xP:1).)
-        
+
         We then loop over the 255 bits (bit 254 down to 0) of the clamped scalar,
-        updating the state with 18 arithmetic operations per iteration (10 multiplications).
-        
+        updating the state with 18 arithmetic operations per iteration (10 muls).
+
         Finally, we return the affine x-coordinate as a * inv(c) mod P.
         """
         # Initialize state
@@ -145,18 +144,19 @@ class MontgomeryLadderOptimized(X25519Curve):
         inv_c = modinv(c, self.p)
         x = a * inv_c % self.p
         return AffinePoint(x, 0)
-    
 
 
-class MontgomeryLadderMKTutorial(X25519Curve):
+class MontgomeryLadderMKTutorial(X25519Curve):  # type: ignore
     # This is 10 multiplications
-    def ladder_step(self, X0: int, Z0: int, X1: int, Z1: int, xP: int) -> tuple[int, int, int, int]:
+    def ladder_step(
+        self, X0: int, Z0: int, X1: int, Z1: int, xP: int
+    ) -> tuple[int, int, int, int]:
         """
         Perform one simultaneous step of the Montgomery ladder:
-        
+
         - R0 = (X0:Z0) is doubled using projective doubling.
         - R1 = (X1:Z1) is updated via differential addition with R0.
-        
+
         The formulas are:
         * Doubling:
             A  = X0 + Z0
@@ -165,7 +165,7 @@ class MontgomeryLadderMKTutorial(X25519Curve):
             C  = AA - BB
             new_X0 = AA * BB
             new_Z0 = C * (AA + A24 * C)
-        
+
         * Differential addition (using the fact that R1 - R0 = (xP:1)):
             D = X1 + Z1
             E = X1 - Z1
@@ -173,7 +173,7 @@ class MontgomeryLadderMKTutorial(X25519Curve):
             CB = D * B
             new_X1 = (DA + CB)^2
             new_Z1 = xP * (DA - CB)^2
-            
+
         All operations are performed modulo P.
         """
         # --- Doubling of R0 ---
@@ -198,19 +198,19 @@ class MontgomeryLadderMKTutorial(X25519Curve):
     def scalar_mult(self, R: Point, scalar: int) -> Point:
         """
         Compute the X25519 scalar multiplication using the Montgomery ladder.
-        
+
         This function uses the abstractions for affine/projective conversion
         and a separate ladder step. The base point's affine x-coordinate is u_int.
-        
+
         The two projective points used in the ladder are:
             R0 = (X0:Z0) and R1 = (X1:Z1)
         They are initialized as:
             R0 = (1:0)   (the point-at-infinity in this coordinate system)
             R1 = (u_int:1)  (the affine base point in projective form)
-        
+
         For each bit (from bit 254 down to 0) of the clamped scalar k_int,
         a conditional swap is performed followed by a ladder step.
-        
+
         Finally, the resulting projective coordinate R0 is converted back to affine.
         """
         xP = R.x  # The base point's affine x-coordinate
