@@ -10,6 +10,7 @@ class Key:
 
     def __init__(self, key: bytes | None = None):
         self._key = secrets.token_bytes(KEY_SIZE) if key is None else key
+        self.__post_init__()
 
     def __post_init__(self) -> None:
         if len(self._key) != KEY_SIZE:
@@ -26,8 +27,12 @@ class PrivateKey(Key):
 
 
 @dataclass
-class PublicKey(Key): ...
+class PublicKey(Key):
+    def __init__(self, key: bytes | None = None):
+        super().__init__(key)
 
 
 @dataclass
-class SharedKey(Key): ...
+class SharedKey(Key):
+    def __init__(self, key: bytes | None = None):
+        super().__init__(key)
