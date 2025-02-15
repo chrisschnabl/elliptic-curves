@@ -1,8 +1,7 @@
 from curve import AffinePoint, IdentityPoint, Point
 from ed25519.affine_edwards_curve import AffineEdwardsCurve
 from ed25519.edwards_curve import ExtendedPoint
-
-# TODO: am unhappy with the naming
+from util import projective_to_affine
 
 
 class ExtendedEdwardsCurve(AffineEdwardsCurve):  # type: ignore
@@ -10,10 +9,7 @@ class ExtendedEdwardsCurve(AffineEdwardsCurve):  # type: ignore
 
     def __init__(self) -> None:
         super().__init__()
-        # Base point B (as specified in RFC8032) in affine coordinates.
-        x = 15112221349535400772501151409588531511454012693041857206046113283949847762202
-        y = 46316835694926478169428394003475163141307993866256225615783033603165251855960
-        self.B = self._from_affine(AffinePoint(x, y))
+        self.B: ExtendedPoint = self._from_affine(self.B)  # has-type: ignore
 
     def add(self, P: Point, Q: Point) -> Point:
         """Add two points P and Q on the curve using extended homogeneous coordinates."""
@@ -44,6 +40,7 @@ class ExtendedEdwardsCurve(AffineEdwardsCurve):  # type: ignore
         Double a point P on the curve using extended homogeneous coordinates.
 
         This implements formulae 7 from the point doubling paper.
+        https://eprint.iacr.org/2017/293.pdf
         """
         if P is IdentityPoint:
             return IdentityPoint
@@ -75,9 +72,10 @@ class ExtendedEdwardsCurve(AffineEdwardsCurve):  # type: ignore
         if P is IdentityPoint:
             return IdentityPoint
 
-        x = P.x * pow(P.z, -1, self.p) % self.p
-        y = P.y * pow(P.z, -1, self.p) % self.p
-        return AffinePoint(x, y)
+        return AffinePoint(
+            projective_to_affine(P.x, P.z, self.p),
+            projective_to_affine(P.y, P.z, self.p),
+        )
 
     def compress(self, point: Point) -> bytes:
         return super().compress(self._to_affine(point))  # type: ignore

@@ -8,14 +8,8 @@ from x25519.x25519_curve import X25519Curve
 
 class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):  # type: ignore
     def __init__(self) -> None:
-        self.p = 2**255 - 19
+        super().__init__()
         self.A = 486662
-        # Standard base point for Curve25519 (full coordinates).
-        # Uses the second y-coordiante specified in an Erratum to RFC 7748.
-        self.B: Point = AffinePoint(
-            9,
-            43114425171068552920764898935933967039370386198203806730763910166200978582548,
-        )
 
     @override  # type: ignore
     def decode_public_key_bytes(self, public_key_bytes: bytes) -> int:

@@ -1,4 +1,4 @@
-from curve import AffinePoint, Curve, IdentityPoint
+from curve import AffinePoint, Curve, IdentityPoint, Point
 from util import clamp_scalar, decode_u, encode_u_coordinate
 
 
@@ -11,8 +11,13 @@ class X25519Curve(Curve):  # type: ignore
     def __init__(self) -> None:
         self.p = 2**255 - 19
         self.a24 = 121665
+        # Standard base point for Curve25519 (full coordinates).
+        # Uses the second y-coordiante specified in an Erratum to RFC 7748.
+        self.B: Point = AffinePoint(
+            9,
+            43114425171068552920764898935933967039370386198203806730763910166200978582548,
+        )
 
-    # TODO CS: maybe use an ecnode_public_key here
     def decode_public_key_bytes(self, public_key_bytes: bytes) -> int:
         return decode_u(public_key_bytes)  # type: ignore
 

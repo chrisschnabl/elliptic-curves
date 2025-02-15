@@ -1,5 +1,6 @@
 from diffie_hellman import DiffieHellman
 from keys import PrivateKey, PublicKey, SharedKey
+from util import encode_u_coordinate
 from x25519.montgomery_ladder import MontgomeryLadderRFC7748
 from x25519.x25519_curve import X25519Curve
 
@@ -25,10 +26,10 @@ class EllipticCurveDiffieHellman(DiffieHellman):  # type: ignore
             ladder (Optional[MontgomeryLadder]): An instance of the Montgomery ladder.
         """
         super().__init__(private_key)
-        self.x25519 = curve if curve is not None else MontgomeryLadderRFC7748()
-        self.public_key = self._compute_public_key()
+        self.curve = curve if curve is not None else MontgomeryLadderRFC7748()
+        self.public_key = self.compute_public_key()
 
-    def _compute_public_key(self) -> PublicKey:
+    def compute_public_key(self) -> PublicKey:
         """
         Computes the public key corresponding to the private key.
 
@@ -38,8 +39,11 @@ class EllipticCurveDiffieHellman(DiffieHellman):  # type: ignore
         Returns:
             PublicKey: The 32-byte public key.
         """
-        base_point = b"\x09" + (b"\x00" * 31)  # TODO CS: re-use the curve's base point
-        return PublicKey(self.x25519.x25519(self.private_key.get_key(), base_point))
+        return PublicKey(
+            self.curve.x25519(
+                self.private_key.get_key(), encode_u_coordinate(self.curve.B.x)
+            )
+        )
 
     def generate_shared_secret(self, peer_public_key: PublicKey) -> SharedKey:
         """
@@ -52,5 +56,5 @@ class EllipticCurveDiffieHellman(DiffieHellman):  # type: ignore
             SharedKey: The computed 32-byte shared secret.
         """
         return SharedKey(
-            self.x25519.x25519(self.private_key.get_key(), peer_public_key.get_key())
+            self.curve.x25519(self.private_key.get_key(), peer_public_key.get_key())
         )

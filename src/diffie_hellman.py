@@ -12,5 +12,5 @@ class DiffieHellman(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _compute_public_key(self) -> PublicKey:
+    def compute_public_key(self) -> PublicKey:
         raise NotImplementedError
