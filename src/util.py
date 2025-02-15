@@ -20,7 +20,6 @@ def clamp_scalar(k: bytearray) -> int:
 
     Returns an integer (little-endian).
     """
-    # TODO: documetn this
     k[0] &= 248
     k[31] &= 127
     k[31] |= 64

@@ -128,9 +128,6 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
 
         # Number of random test cases
         num_tests = 200
-
-        # TODO: also sample random points (that are valid points on the curve)
-
         for i in range(num_tests):
             k_bytes = os.urandom(32)
             u_bytes = os.urandom(32)

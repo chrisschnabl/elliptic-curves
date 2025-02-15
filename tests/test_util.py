@@ -12,18 +12,7 @@ from util import (
     sqrt_mod,
 )
 
-# Import the functions from your module.
-# For example, if they are defined in a module called `crypto_math`:
-# from crypto_math import (
-#     cswap, clamp_scalar, modinv, sqrt_mod,
-#     decode_u, encode_u_coordinate,
-#     affine_to_projective, projective_to_affine
-# )
 
-# For this example, we'll assume the functions are in the current namespace.
-
-
-# --- Tests for cswap ---
 class TestCSwap(unittest.TestCase):
     def test_no_swap(self) -> None:
         p = 101  # A small prime
@@ -54,7 +43,6 @@ class TestCSwap(unittest.TestCase):
         self.assertEqual(y_new, (x % p))
 
 
-# --- Tests for clamp_scalar ---
 class TestClampScalar(unittest.TestCase):
     def test_clamp_scalar_all_ones(self) -> None:
         # Input: 32 bytes of 0xff.
@@ -77,7 +65,6 @@ class TestClampScalar(unittest.TestCase):
         self.assertEqual(result, int.from_bytes(k, "little"))
 
 
-# --- Tests for modinv ---
 class TestModInv(unittest.TestCase):
     def test_modinv_nonzero(self) -> None:
         p = 101
@@ -87,13 +74,12 @@ class TestModInv(unittest.TestCase):
             self.assertEqual((x * inv) % p, 1)
 
     def test_modinv_zero(self) -> None:
-        # By our implementation, modinv(0, p) returns 0,
-        # even though mathematically 0 has no inverse.
+        # Our impl modinv(0, p) returns 0,
+        # even though 0 has no inverse.
         p = 101
         self.assertEqual(modinv(0, p), 0)
 
 
-# --- Tests for sqrt_mod ---
 class TestSqrtMod(unittest.TestCase):
     def test_sqrt_mod_zero(self) -> None:
         p = 13
@@ -128,7 +114,6 @@ class TestSqrtMod(unittest.TestCase):
             sqrt_mod(a, p)
 
 
-# --- Tests for decode_u and encode_u_coordinate ---
 class TestDecodeEncodeU(unittest.TestCase):
     def test_decode_u(self) -> None:
         # Create a 32-byte string with nonzero values and with
@@ -156,7 +141,6 @@ class TestDecodeEncodeU(unittest.TestCase):
         self.assertEqual(x, decoded)
 
 
-# --- Tests for affine/projective conversions ---
 class TestAffineProjective(unittest.TestCase):
     def test_affine_to_projective(self) -> None:
         x = 42
@@ -167,7 +151,7 @@ class TestAffineProjective(unittest.TestCase):
     def test_projective_to_affine(self) -> None:
         p = 101
         # For a given x and nonzero Z, if we set X = x * Z mod p,
-        # then converting back should yield x mod p.
+        # then convert back should yield x mod p.
         for x in range(0, p):
             for Z in range(1, p):  # Z must be invertible mod p.
                 X = (x * Z) % p

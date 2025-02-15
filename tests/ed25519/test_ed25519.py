@@ -198,9 +198,6 @@ class TestEd25519Implementation(unittest.TestCase):
             f"Custom verification failed for a large message with {curve_name}.",
         )
 
-    # TODO: CS test interoperability with PyNaCl
-    # TODO: CS run timing tests
-
 
 if __name__ == "__main__":
     unittest.main()
