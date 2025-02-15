@@ -1,5 +1,6 @@
-import hashlib
 from collections.abc import Callable
+
+import nacl.hash
 
 from ed25519.affine_edwards_curve import AffineEdwardsCurve
 from ed25519.edwards_curve import EdwardsCurve
@@ -21,13 +22,9 @@ class Ed25519(SignatureScheme):  # type: ignore
         self.curve: EdwardsCurve = curve
 
         def hash_function(plain_text: bytes) -> bytes:
-            return hashlib.sha512(plain_text).digest()
+            return nacl.hash.sha512(plain_text, encoder=nacl.encoding.RawEncoder)  # type: ignore
 
         self.hash_function: Callable[[bytes], bytes] = hash_function
-
-        # self.hash_function =
-        # #nacl.hash.sha512(plain_text, encoder=nacl.encoding.RawEncoder)
-        # somehow this fails for the invalid Signature TEST TODO CS: why?
         self._hashed_secret_key = self.hash_function(secret_key)
         s_bits = self._hashed_secret_key[:32]
         self.s_int = clamp_scalar(bytearray(s_bits))

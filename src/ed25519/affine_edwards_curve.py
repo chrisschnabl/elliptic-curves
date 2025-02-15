@@ -6,12 +6,7 @@ from util import modinv, sqrt_mod
 
 
 class AffineEdwardsCurve(EdwardsCurve):  # type: ignore
-    """
-    Point represented in affine coordinates.
-
-    Carries a reference to the underlying curve. Arithmetic is implemented via conversion
-    to extended coordinates.
-    """
+    """Point represented in affine coordinates."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -42,10 +37,9 @@ class AffineEdwardsCurve(EdwardsCurve):  # type: ignore
 
     @override
     def double(self, R: Point) -> Point:  # type: ignore
-        # TODO CS: Implement this in faster
         # x3 = (x1*y1+y1*x1)/(1+d*x1*x1*y1*y1)
-        # y3 = (y1*y1-a*x1*x1)/(1-d*x1*x1*y1*y1) from
-        # https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html
+        # y3 = (y1*y1-a*x1*x1)/(1-d*x1*x1*y1*y1)
+        # from: https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html
         if R is IdentityPoint:
             return IdentityPoint
 

@@ -130,7 +130,7 @@ class TestEd25519Implementation(unittest.TestCase):
     )  # type: ignore
     def test_invalid_signature(self, curve: EdwardsCurve, curve_name: str) -> None:
         _, nacl_signing_key, custom_signer = self.generate_keys(curve)
-        msg = b"Test message for invalid signature"
+        msg: bytes = b"Test message for invalid signature"
         custom_signature = custom_signer.sign(msg)
 
         altered_signature = bytearray(custom_signature)
@@ -141,7 +141,7 @@ class TestEd25519Implementation(unittest.TestCase):
             nacl_signing_key.verify_key.verify(bytes(altered_signature) + msg)
 
         self.assertFalse(
-            custom_signer.verify(altered_signature, msg, custom_signer.public_key),
+            custom_signer.verify(bytes(altered_signature), msg, custom_signer.public_key),
             f"Custom verification accepted an altered signature with {curve_name}.",
         )
 

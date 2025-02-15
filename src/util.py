@@ -1,11 +1,9 @@
-# -------------------------------------------------------------------
-# Non constant-time conditional swap
-# -------------------------------------------------------------------
 def cswap(swap: int, x: int, y: int, p: int) -> tuple[int, int]:
     """
     Swap x and y if swap == 1, otherwise leave them unchanged.
 
-    (Uses arithmetic so that both branches perform the same operations.)
+    (Uses arithmetic so that both branches perform the same operations.) This is not
+    really constant-time.
     """
     dummy = swap * (x - y)
     x_new = (x - dummy) % p
@@ -30,9 +28,7 @@ def clamp_scalar(k: bytearray) -> int:
 
 
 def modinv(x: int, p: int) -> int:
-    """
-    Modular inverse modulo p (p is prime).
-    """
+    """Modular inverse modulo p (p is prime)."""
     return pow(x, p - 2, p)
 
 
@@ -71,9 +67,7 @@ def decode_u(u_bytes: bytes) -> int:
 
 
 def encode_u_coordinate(x: int) -> bytes:
-    """
-    Encode an integer x as a 32-byte little-endian byte string.
-    """
+    """Encode an integer x as a 32-byte little-endian byte string."""
     return x.to_bytes(32, "little")
 
 
@@ -88,8 +82,5 @@ def affine_to_projective(x: int) -> tuple[int, int]:
 
 
 def projective_to_affine(X: int, Z: int, p: int) -> int:
-    """
-    Convert a projective coordinate (X:Z) to an affine coordinate x = X/Z mod P.
-    """
-    # TODO: check potential oerlaps with ed25519
+    """Convert a projective coordinate (X:Z) to an affine coordinate x = X/Z mod P."""
     return (X * modinv(Z, p)) % p
