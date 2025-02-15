@@ -11,6 +11,7 @@ class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):  # type: ignore
         self.p = 2**255 - 19
         self.A = 486662
         # Standard base point for Curve25519 (full coordinates).
+        # Uses the second y-coordiante specified in an Erratum to RFC 7748.
         self.B: Point = AffinePoint(
             9,
             43114425171068552920764898935933967039370386198203806730763910166200978582548,
@@ -29,8 +30,8 @@ class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):  # type: ignore
         """
         Given an x-coordinate, recover a point (x,y) on the curve defined by:
 
-        y² = x³ + A*x² + x   (mod p) by computing a square root of the right-hand side.
-        (If there is no square root, a ValueError is raised.)
+        y**2 = x**3 + A*x**2 + x   (mod p) by computing a square root of the RHS.
+        If there is no square root, raise a ValueError.
         """
         rhs = (pow(x, 3, self.p) + self.A * pow(x, 2, self.p) + x) % self.p
         y = tonelli(rhs, self.p)
@@ -45,8 +46,8 @@ class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):  # type: ignore
     @override  # type: ignore
     def add(self, P: Point, Q: Point) -> Point:
         """
-        Add two points P and Q (affine coordinates) on the Montgomery curve: y**2 = x**3 +
-        A*x*x + x   (mod p)
+        Add two points P and Q (affine coordinates) on the
+        Montgomery curve: y**2 = x**3 + A*x*x + x   (mod p)
 
         For distinct points:
             λ = (y_2 - y_1) / (x_2 - x_1) mod p,

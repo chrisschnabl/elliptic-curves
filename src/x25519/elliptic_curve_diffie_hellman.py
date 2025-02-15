@@ -54,26 +54,3 @@ class EllipticCurveDiffieHellman(DiffieHellman):  # type: ignore
         return SharedKey(
             self.x25519.x25519(self.private_key.get_key(), peer_public_key.get_key())
         )
-
-
-# -------------------------------------------------------------------
-# Example Usage
-# -------------------------------------------------------------------
-
-if __name__ == "__main__":
-    # Party A: Alice creates her Diffie–Hellman object (with a random private key)
-    alice = EllipticCurveDiffieHellman(PrivateKey())
-
-    # Party B: Bob creates his Diffie–Hellman object
-    bob = EllipticCurveDiffieHellman(PrivateKey())
-
-    # Each party computes the shared secret using the other's public key.
-    alice_shared = alice.generate_shared_secret(bob.public_key)
-    bob_shared = bob.generate_shared_secret(alice.public_key)
-
-    # The shared secrets should match.
-    match = alice_shared == bob_shared
-    if not match:
-        pass
-    else:
-        pass
