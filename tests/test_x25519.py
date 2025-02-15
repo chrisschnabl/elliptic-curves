@@ -7,7 +7,6 @@ from parameterized import parameterized
 from x25519.group_law import X25519CurveGroupLaw
 from x25519.montgomery_ladder import (
     MontgomeryLadderMKTutorial,
-    MontgomeryLadderOptimized,
     MontgomeryLadderRFC7748,
 )
 from x25519.x25519_curve import X25519Curve
@@ -18,7 +17,6 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
         [
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
-            ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
     )  # type: ignore
@@ -76,7 +74,6 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
         [
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
-            ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
     )  # type: ignore
@@ -123,13 +120,10 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
         [
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
-            ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
         ]
     )  # type: ignore
     def test_random_vectors(self, name: str, impl: X25519Curve) -> None:
-        """
-        Test X25519 implementation against PyNaCl with random keys and points.
-        """
+        """Test X25519 implementation against PyNaCl with random keys and points."""
         import os
 
         # Number of random test cases

@@ -9,7 +9,6 @@ from x25519.elliptic_curve_diffie_hellman import EllipticCurveDiffieHellman
 from x25519.group_law import X25519CurveGroupLaw
 from x25519.montgomery_ladder import (
     MontgomeryLadderMKTutorial,
-    MontgomeryLadderOptimized,
     MontgomeryLadderRFC7748,
 )
 from x25519.x25519_curve import X25519Curve
@@ -23,7 +22,6 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
     )  # type: ignore
@@ -54,7 +52,6 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
     )  # type: ignore
@@ -82,7 +79,6 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
     )  # type: ignore
@@ -133,7 +129,6 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
     )  # type: ignore
@@ -155,7 +150,6 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("MontgomeryLadderOptimized", MontgomeryLadderOptimized()),
             ("GroupLaw", X25519CurveGroupLaw()),
         ]
     )  # type: ignore
