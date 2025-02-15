@@ -9,6 +9,7 @@ from ed25519.affine_edwards_curve import AffineEdwardsCurve
 from ed25519.edwards_curve import EdwardsCurve
 from ed25519.edwards_signature_scheme import Ed25519
 from ed25519.extended_edwards_curve import ExtendedEdwardsCurve
+from keys import PrivateKey
 
 
 class TestEd25519Implementation(unittest.TestCase):
@@ -24,11 +25,11 @@ class TestEd25519Implementation(unittest.TestCase):
         nacl_signing_key = SigningKey(seed)
         nacl_public_key = nacl_signing_key.verify_key.encode()  # 32-byte public key
 
-        custom_signer = Ed25519(secret_key=seed, curve=curve)
+        custom_signer = Ed25519(secret_key=PrivateKey(seed), curve=curve)
 
         # Check that both implementations produce the same public key.
         self.assertEqual(
-            custom_signer.get_public_key(),
+            custom_signer.get_public_key().get_key(),
             nacl_public_key,
             "Public keys do not match between implementations.",
         )
@@ -157,7 +158,7 @@ class TestEd25519Implementation(unittest.TestCase):
         custom_signature = custom_signer.sign(msg)
 
         wrong_seed = secrets.token_bytes(32)
-        wrong_signer = Ed25519(secret_key=wrong_seed)
+        wrong_signer = Ed25519(secret_key=PrivateKey(wrong_seed))
 
         self.assertNotEqual(
             custom_signer.public_key,

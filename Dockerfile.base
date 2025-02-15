@@ -19,6 +19,5 @@ WORKDIR $WORKDIR_PATH
 
 # Copy all your project files into the container.
 COPY . .
-
 # Build the virtual environment and install dependencies.
 RUN uv sync --frozen

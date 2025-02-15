@@ -25,11 +25,11 @@ class Ed25519(SignatureScheme):  # type: ignore
             return nacl.hash.sha512(plain_text, encoder=nacl.encoding.RawEncoder)  # type: ignore
 
         self.hash_function: Callable[[bytes], bytes] = hash_function
-        self._hashed_secret_key = self.hash_function(secret_key)
+        self._hashed_secret_key = self.hash_function(secret_key.get_key())
         s_bits = self._hashed_secret_key[:32]
         self.s_int = clamp_scalar(bytearray(s_bits))
         self.public_key = self.curve.scalar_mult(self.curve.B, self.s_int)
-        self.public_key = self.curve.compress(self.public_key)
+        self.public_key = PublicKey(self.curve.compress(self.public_key))
 
     def sign(self, msg: bytes) -> bytes:
         """
@@ -54,7 +54,7 @@ class Ed25519(SignatureScheme):  # type: ignore
         R_comp = self.curve.compress(R_point)
 
         # Compute challenge k = SHA512(R || public_key || msg) mod q.
-        k_hash = self.hash_function(R_comp + self.public_key + msg)
+        k_hash = self.hash_function(R_comp + self.public_key.get_key() + msg)
         k_int = int.from_bytes(k_hash, "little") % self.curve.q
 
         # Compute response t = (r + k * s) mod q.
@@ -77,19 +77,18 @@ class Ed25519(SignatureScheme):  # type: ignore
 
         if len(sig) != 64:
             raise ValueError("Signature must be 64 bytes")
-        if len(pk) != 32:
-            raise ValueError("Public key must be 32 bytes")
+
         R_comp = sig[:32]
         t_bytes = sig[32:]
         t_int = int.from_bytes(t_bytes, "little") % self.curve.q
 
         try:
             R = self.curve.uncompress(R_comp)
-            A = self.curve.uncompress(pk)
+            A = self.curve.uncompress(pk.get_key())
         except ValueError:
             return False
 
-        k_hash = self.hash_function(R_comp + pk + msg)
+        k_hash = self.hash_function(R_comp + pk.get_key() + msg)
         k_int = int.from_bytes(k_hash, "little") % self.curve.q
 
         # Compute left-hand side: [t]B.
