@@ -4,23 +4,23 @@ from binascii import unhexlify
 from nacl.bindings import crypto_scalarmult
 from parameterized import parameterized
 
-from x25519.group_law import X25519CurveGroupLaw
+from x25519.curve25519 import Curve25519
+from x25519.group_law import Curve25519GroupLaw
 from x25519.montgomery_ladder import (
     MontgomeryLadderMKTutorial,
     MontgomeryLadderRFC7748,
 )
-from x25519.x25519_curve import X25519Curve
 
 
-class TestX25519ImplementsRFC7748(unittest.TestCase):
+class TestCurve25519ImplementsRFC7748(unittest.TestCase):
     @parameterized.expand(
         [
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
-            ("GroupLaw", X25519CurveGroupLaw()),
+            ("GroupLaw", Curve25519GroupLaw()),
         ]
     )  # type: ignore
-    def test_rfc7748_vectors(self, name: str, impl: X25519Curve) -> None:
+    def test_rfc7748_vectors(self, name: str, impl: Curve25519) -> None:
         vectors = [
             (
                 "vector1",
@@ -74,10 +74,10 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
         [
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
-            ("GroupLaw", X25519CurveGroupLaw()),
+            ("GroupLaw", Curve25519GroupLaw()),
         ]
     )  # type: ignore
-    def test_rfc7748_iterative(self, name: str, impl: X25519Curve) -> None:
+    def test_rfc7748_iterative(self, name: str, impl: Curve25519) -> None:
         # Initial values for k and u as specified in RFC 7748 Section 5.2
         k = unhexlify("0900000000000000000000000000000000000000000000000000000000000000")
         u = unhexlify("0900000000000000000000000000000000000000000000000000000000000000")
@@ -122,7 +122,7 @@ class TestX25519ImplementsRFC7748(unittest.TestCase):
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
         ]
     )  # type: ignore
-    def test_random_vectors(self, name: str, impl: X25519Curve) -> None:
+    def test_random_vectors(self, name: str, impl: Curve25519) -> None:
         """Test X25519 implementation against PyNaCl with random keys and points."""
         import os
 

@@ -1,8 +1,8 @@
 from diffie_hellman import DiffieHellman
 from keys import PrivateKey, PublicKey, SharedKey
 from util import encode_u_coordinate
+from x25519.curve25519 import Curve25519
 from x25519.montgomery_ladder import MontgomeryLadderRFC7748
-from x25519.x25519_curve import X25519Curve
 
 
 class EllipticCurveDiffieHellman(DiffieHellman):  # type: ignore
@@ -16,7 +16,7 @@ class EllipticCurveDiffieHellman(DiffieHellman):  # type: ignore
     """
 
     def __init__(
-        self, private_key: PrivateKey, curve: X25519Curve | None = None
+        self, private_key: PrivateKey, curve: Curve25519 | None = None
     ):  # sub: ignore
         """
         Initialize the DiffieHellman instance.

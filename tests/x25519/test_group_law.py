@@ -1,11 +1,11 @@
 import unittest
 
-from x25519.group_law import X25519CurveGroupLaw
+from x25519.group_law import Curve25519GroupLaw
 
 
 class TestMontgomeryCurveOperations(unittest.TestCase):
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        self.curve = X25519CurveGroupLaw()
+        self.curve = Curve25519GroupLaw()
         super().__init__(*args, **kwargs)
 
     def test_recover_point_base(self) -> None:

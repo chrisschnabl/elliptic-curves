@@ -3,21 +3,13 @@ from typing import override
 from curve import AffinePoint, DoubleAndAddCurve, IdentityPoint, Point
 from tonelli import tonelli
 from util import modinv
-from x25519.x25519_curve import X25519Curve
+from x25519.curve25519 import Curve25519
 
 
-class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):  # type: ignore
+class Curve25519GroupLaw(Curve25519, DoubleAndAddCurve):  # type: ignore
     def __init__(self) -> None:
         super().__init__()
         self.A = 486662
-
-    @override  # type: ignore
-    def decode_public_key_bytes(self, public_key_bytes: bytes) -> int:
-        # Create a mutable copy and clear bit 255 of the last byte.
-        pk_bytes = bytearray(public_key_bytes)
-        pk_bytes[31] &= 0x7F  # mask with 0x7F to clear the top bit
-        # Convert the little-endian byte array to an integer.
-        return int.from_bytes(pk_bytes, byteorder="little")
 
     @override  # type: ignore
     def recover_point(self, x: int) -> Point:
@@ -45,8 +37,8 @@ class X25519CurveGroupLaw(X25519Curve, DoubleAndAddCurve):  # type: ignore
 
         For distinct points:
             λ = (y_2 - y_1) / (x_2 - x_1) mod p,
-            x₃ = λ*λ - A - x_1 - x_2 mod p,
-            y₃ = λ*(x_1 - x_3) - y_1 mod p.
+            x**3 = λ*λ - A - x_1 - x_2 mod p,
+            y**3 = λ*(x_1 - x_3) - y_1 mod p.
         If P == Q then doubling is performed.
         Returns the resulting point, or None if the result is the point at infinity.
         """

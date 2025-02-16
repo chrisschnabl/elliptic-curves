@@ -5,13 +5,13 @@ from nacl.bindings import crypto_scalarmult
 from parameterized import parameterized
 
 from keys import PrivateKey
+from x25519.curve25519 import Curve25519
 from x25519.elliptic_curve_diffie_hellman import EllipticCurveDiffieHellman
-from x25519.group_law import X25519CurveGroupLaw
+from x25519.group_law import Curve25519GroupLaw
 from x25519.montgomery_ladder import (
     MontgomeryLadderMKTutorial,
     MontgomeryLadderRFC7748,
 )
-from x25519.x25519_curve import X25519Curve
 
 
 class TestDiffieHellmanVectors(unittest.TestCase):
@@ -22,10 +22,10 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("GroupLaw", X25519CurveGroupLaw()),
+            ("GroupLaw", Curve25519GroupLaw()),
         ]
     )  # type: ignore
-    def test_alice_public_key(self, name: str, curve: X25519Curve) -> None:
+    def test_alice_public_key(self, name: str, curve: Curve25519) -> None:
         # Test vector from RFC 7748
         # Alice's private key, a:
         alice_private_hex = (
@@ -52,7 +52,7 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("GroupLaw", X25519CurveGroupLaw()),
+            ("GroupLaw", Curve25519GroupLaw()),
         ]
     )  # type: ignore
     def test_bob_public_key(self, name, curve) -> None:
@@ -79,7 +79,7 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("GroupLaw", X25519CurveGroupLaw()),
+            ("GroupLaw", Curve25519GroupLaw()),
         ]
     )  # type: ignore
     def test_shared_secret(self, name, curve) -> None:
@@ -129,7 +129,7 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("GroupLaw", X25519CurveGroupLaw()),
+            ("GroupLaw", Curve25519GroupLaw()),
         ]
     )  # type: ignore
     def test_compare_with_pynacl_public_key(self, name, curve) -> None:
@@ -150,7 +150,7 @@ class TestDiffieHellmanVectors(unittest.TestCase):
         [
             ("MontgomeryLadderRFC7748", MontgomeryLadderRFC7748()),
             ("MontgomeryLadderMKTutorial", MontgomeryLadderMKTutorial()),
-            ("GroupLaw", X25519CurveGroupLaw()),
+            ("GroupLaw", Curve25519GroupLaw()),
         ]
     )  # type: ignore
     def test_compare_with_pynacl_shared_secret(self, name, curve) -> None:

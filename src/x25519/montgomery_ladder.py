@@ -1,6 +1,6 @@
 from curve import AffinePoint, Point
 from util import cswap, modinv, projective_to_affine
-from x25519.x25519_curve import X25519Curve
+from x25519.curve25519 import Curve25519
 
 """
 WARNING: This code is not constant-time and is unsuitable for
@@ -8,7 +8,7 @@ production use. It is intended only as a pedagogical reference.
 """
 
 
-class MontgomeryLadderRFC7748(X25519Curve):  # type: ignore
+class MontgomeryLadderRFC7748(Curve25519):  # type: ignore
     def scalar_mult(self, R: Point, scalar: int) -> Point:
         """
         Perform the Montgomery ladder (scalar multiplication) on Curve25519: X25519(k, u)
@@ -65,7 +65,7 @@ class MontgomeryLadderRFC7748(X25519Curve):  # type: ignore
         return AffinePoint(x, 0)  # We only care about the x-coordinate
 
 
-class MontgomeryLadderMKTutorial(X25519Curve):  # type: ignore
+class MontgomeryLadderMKTutorial(Curve25519):  # type: ignore
     def ladder_step(
         self, a: int, b: int, c: int, d: int, Rx: int
     ) -> tuple[int, int, int, int]:

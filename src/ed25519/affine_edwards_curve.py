@@ -37,9 +37,13 @@ class AffineEdwardsCurve(EdwardsCurve):  # type: ignore
 
     @override
     def double(self, R: Point) -> Point:  # type: ignore
-        # x3 = (x1*y1+y1*x1)/(1+d*x1*x1*y1*y1)
-        # y3 = (y1*y1-a*x1*x1)/(1-d*x1*x1*y1*y1)
-        # from: https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html
+        """
+        Double a point R = (x1, y1) on the Edwards curve.
+        The formulas used are:
+            x3 = (x1*y1+y1*x1)/(1+d*x1*x1*y1*y1)
+            y3 = (y1*y1-a*x1*x1)/(1-d*x1*x1*y1*y1)
+        from: https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html
+        """
         if R is IdentityPoint:
             return IdentityPoint
 
