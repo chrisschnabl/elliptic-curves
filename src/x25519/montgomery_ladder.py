@@ -2,11 +2,6 @@ from curve import AffinePoint, Point
 from util import cswap, modinv, projective_to_affine
 from x25519.curve25519 import Curve25519
 
-"""
-WARNING: This code is not constant-time and is unsuitable for
-production use. It is intended only as a pedagogical reference.
-"""
-
 
 class MontgomeryLadderRFC7748(Curve25519):  # type: ignore
     def scalar_mult(self, R: Point, scalar: int) -> Point:
