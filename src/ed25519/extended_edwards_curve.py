@@ -12,7 +12,11 @@ class ExtendedEdwardsCurve(AffineEdwardsCurve):  # type: ignore
         self.B: ExtendedPoint = self._from_affine(self.B)  # has-type: ignore
 
     def add(self, P: Point, Q: Point) -> Point:
-        """Add two points P and Q on the curve using extended homogeneous coordinates."""
+        """
+        Add two points P and Q on the curve using extended homogeneous coordinates.
+        Runs in 8M + 1D (here M does not account for multiplications with constants).
+        Section 3.2 of https://eprint.iacr.org/2008/522.pdf
+        """
         if P is IdentityPoint or Q is IdentityPoint:
             return P if P is IdentityPoint else Q
 
@@ -38,9 +42,10 @@ class ExtendedEdwardsCurve(AffineEdwardsCurve):  # type: ignore
     def double(self, P: Point) -> Point:
         """
         Double a point P on the curve using extended homogeneous coordinates.
-
-        This implements formulae 7 from the point doubling paper.
-        https://eprint.iacr.org/2017/293.pdf
+        Implements formula 7 of this paper https://eprint.iacr.org/2008/522.pdf
+        that is derived from doubling in extended coordinates (X, Y, Z)
+        https://eprint.iacr.org/2008/013.pdf
+        Runs in 4M + 4S + 1D (S for Squarings)
         """
         if P is IdentityPoint:
             return IdentityPoint

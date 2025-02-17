@@ -17,6 +17,7 @@ class AffineEdwardsCurve(EdwardsCurve):  # type: ignore
         The formulas used are:
             x3 = (x1*y2 + y1*x2) / (1 + d*x1*x2*y1*y2)
             y3 = (y1*y2 + x1*x2) / (1 - d*x1*x2*y1*y2)
+        from: https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html
         """
         if P is IdentityPoint:
             return Q
