@@ -1,18 +1,15 @@
 [project]
 name = "elliptic-curves"
 version = "0.1.0"
-description = "Elliptic curve P79 task 01"
+description = "Elliptic curve P79"
 requires-python = ">=3.13"
 license = { file = "LICENSE" }
 authors = [
-    { name = "Chris Schnabl", email = "cs2280@cam.ac.uk" },
+    { name = "Christoph Schnabl", email = "cs2280@cam.ac.uk" },
 ]
 readme = { file = "README.md", content-type = "text/markdown" }
 dependencies = [
-    "parameterized>=0.9.0",
-    "pydantic>=2.10.6",
     "pynacl>=1.5.0",
-    "tonellishanks>=0.1.1",
 ]
 
 [project.urls]
@@ -33,6 +30,8 @@ dev = [
   "mypy>=1.14.1",
   "bandit>=1.8.0",
   "ruff>=0.8.6",
+  "tonellishanks>=0.1.1", # To test against the custom implementation
+  "parameterized>=0.9.0", # For parameterized tests
 ]
 
 [tool.pytest.ini_options]

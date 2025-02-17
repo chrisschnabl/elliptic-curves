@@ -23,10 +23,9 @@ def minimal_ed25519_example() -> None:
     signer = Ed25519(secret_key=my_private_key)
 
     message = b"Hello, Ed25519!"
-    signature = signer.sign(message)
+    signer.sign(message)
     pub_key_bytes = signer.get_public_key()
-    my_public_key = PublicKey(pub_key_bytes.get_key())
-    signer.verify(signature, message, my_public_key)
+    PublicKey(pub_key_bytes.get_key())
 
 
 if __name__ == "__main__":
